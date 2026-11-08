@@ -206,6 +206,20 @@ El valor del proyecto debe evaluarse según su utilidad para la barbería, no po
   parciales, superposición, turnos existentes, reserva directa bloqueada,
   eliminación y control de acceso.
 
+### 9.5 Zona horaria del JVM y CI (2026-11-08)
+
+- GitHub Actions ejecuta las pruebas en un JVM con zona **UTC**. Hibernate usa
+  `hibernate.jdbc.time_zone=APP_TIMEZONE`, pero las columnas `TIME` se
+  convierten con la zona por defecto del JVM: con UTC, `09:00` se leía como
+  `12:00` y fallaban 9 pruebas. En Windows no se veía porque el JVM ya estaba
+  en hora argentina.
+- Se agregó `TimeZoneEnvironmentPostProcessor`, registrado en
+  `META-INF/spring.factories`. Fija `TimeZone.setDefault(APP_TIMEZONE)` después
+  de cargar `.env`/`application.yml` y antes de crear el contexto de Spring.
+- Esto también corrige el despliegue en cualquier servidor Linux que use UTC;
+  no era solo un problema del CI.
+- Verificado: **40 pruebas, 0 fallos** en Linux sin `.env` y en Windows.
+
 ## 10. Mantenimiento de este archivo
 
 Actualizar este documento cuando se tomen decisiones importantes.

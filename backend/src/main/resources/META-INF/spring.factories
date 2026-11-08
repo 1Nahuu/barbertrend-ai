@@ -1,0 +1,6 @@
+# Post-procesadores del entorno de Spring.
+#
+# Se usa para alinear la zona horaria del JVM con APP_TIMEZONE antes de que
+# Hibernate abra la base de datos.
+org.springframework.boot.env.EnvironmentPostProcessor=\
+com.barbertrend.config.TimeZoneEnvironmentPostProcessor
