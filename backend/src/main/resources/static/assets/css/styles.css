@@ -1,0 +1,1665 @@
+/* ==========================================================================
+   BarberTrend AI — Hoja de estilos del sitio público
+   ==========================================================================
+
+   Cómo está organizada:
+     1. Variables          — colores, tipografía, medidas
+     2. Base y reset        — elementos del navegador
+     3. Utilidades          — .container, .sr-only, .skip-link
+     4. Componentes         — botones, campos, tarjetas
+     5. Secciones           — portada, servicios, galería, reservar, contacto
+     6. Pie de página
+     7. Responsive          — tablets y computadoras
+     8. Preferencias        — movimiento reducido, impresión
+
+   Para cambiar los colores de la marca, alcanza con editar el bloque 1.
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. VARIABLES
+   ========================================================================== */
+
+:root {
+    /* --- Color: paleta sobria tipo barbería --- */
+    --bg:             #141414;   /* fondo principal */
+    --bg-alt:         #1a1a1a;   /* secciones alternadas */
+    --surface:        #212121;   /* tarjetas y campos */
+    --surface-hover:  #2a2a2a;
+    --border:         #333333;
+    --border-strong:  #454545;
+
+    --gold:           #c9a227;   /* acento principal */
+    --gold-light:     #e0c060;
+    --gold-dark:      #9d7c1c;
+
+    --cream:          #f2ede4;   /* texto principal */
+    --text-muted:     #a8a29a;   /* texto secundario */
+    --text-dim:       #7a7570;   /* texto terciario */
+
+    --success:        #4caf7d;
+    --success-bg:     rgba(76, 175, 125, 0.12);
+    --danger:         #e05c5c;
+    --danger-bg:      rgba(224, 92, 92, 0.12);
+
+    /* --- Tipografía ---
+       Se usan fuentes del sistema: el sitio carga rápido y no depende
+       de ningún servicio externo. */
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                 'Helvetica Neue', Arial, sans-serif;
+    --font-display: 'Helvetica Neue', Arial, sans-serif;
+
+    /* --- Medidas --- */
+    --container-width: 1180px;
+    --radius:     4px;
+    --radius-lg:  8px;
+    --section-gap: clamp(4rem, 9vw, 7.5rem);
+
+    /* --- Transiciones --- */
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+/* ==========================================================================
+   2. BASE Y RESET
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    /* Evita el salto de página al saltar entre secciones con #ancla */
+    scroll-behavior: smooth;
+    /* Compensa el encabezado fijo cuando se navega por anclas */
+    scroll-padding-top: 5rem;
+}
+
+body {
+    margin: 0;
+    background-color: var(--bg);
+    color: var(--cream);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4 {
+    margin: 0 0 0.5em;
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+}
+
+p {
+    margin: 0 0 1rem;
+}
+
+a {
+    color: var(--gold);
+    text-decoration: none;
+    transition: color var(--transition);
+}
+
+a:hover {
+    color: var(--gold-light);
+}
+
+img, svg {
+    max-width: 100%;
+    display: block;
+}
+
+ul, ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+button {
+    font-family: inherit;
+    font-size: inherit;
+    cursor: pointer;
+}
+
+/* Foco visible para navegación con teclado.
+   Nunca se quita el foco, se cambia: es lo que permite a quien navega
+   sin mouse saber dónde está. */
+:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 3px;
+    border-radius: 2px;
+}
+
+/* Texto solo para lectores de pantalla */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Enlace de salto */
+.skip-link {
+    position: absolute;
+    top: -100px;
+    left: 1rem;
+    z-index: 200;
+    padding: 0.75rem 1.25rem;
+    background: var(--gold);
+    color: #141414;
+    font-weight: 700;
+    border-radius: 0 0 var(--radius) var(--radius);
+    transition: top var(--transition);
+}
+
+.skip-link:focus {
+    top: 0;
+    color: #141414;
+}
+
+
+/* ==========================================================================
+   3. UTILIDADES
+   ========================================================================== */
+
+.container {
+    width: 100%;
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.accent {
+    color: var(--gold);
+}
+
+
+/* ==========================================================================
+   4. COMPONENTES
+   ========================================================================== */
+
+/* --- Botones ------------------------------------------------------------ */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.6rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    background-color: transparent;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+    text-align: center;
+    transition: background-color var(--transition),
+                color var(--transition),
+                border-color var(--transition),
+                transform var(--transition);
+}
+
+/* El :active solo se aplica con mouse o dedo, no con el teclado,
+   para que la página no "salte" al navegar con Enter. */
+.btn:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: var(--gold);
+    color: #141414;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--gold-light);
+    color: #141414;
+}
+
+.btn-outline {
+    border-color: var(--border-strong);
+    color: var(--cream);
+}
+
+.btn-outline:hover:not(:disabled) {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+.btn-ghost {
+    color: var(--cream);
+    border-color: transparent;
+}
+
+.btn-ghost:hover:not(:disabled) {
+    color: var(--gold);
+}
+
+.btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+}
+
+.btn-sm {
+    padding: 0.6rem 1.1rem;
+    font-size: 0.85rem;
+}
+
+.btn-block {
+    width: 100%;
+}
+
+/* Indicador de carga dentro del botón */
+.btn-spinner {
+    display: none;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgba(20, 20, 20, 0.3);
+    border-top-color: #141414;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+.btn.is-loading .btn-spinner {
+    display: block;
+}
+
+.btn.is-loading .btn-label {
+    opacity: 0.7;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* --- Tarjetas de servicio ------------------------------------------------ */
+
+.service-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 1.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: border-color var(--transition),
+                transform var(--transition),
+                background-color var(--transition);
+}
+
+.service-card:hover {
+    border-color: var(--border-strong);
+    background: var(--surface-hover);
+    transform: translateY(-3px);
+}
+
+.service-card__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.65rem;
+}
+
+.service-card__name {
+    margin: 0;
+    font-size: 1.2rem;
+    letter-spacing: -0.01em;
+}
+
+.service-card__price {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--gold);
+    white-space: nowrap;
+}
+
+.service-card__desc {
+    flex: 1;
+    margin: 0 0 1.25rem;
+    color: var(--text-muted);
+    font-size: 0.94rem;
+}
+
+.service-card__foot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--border);
+}
+
+.service-card__cta {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--gold);
+    white-space: nowrap;
+}
+
+.service-card__cta::after {
+    content: ' →';
+    transition: transform var(--transition);
+    display: inline-block;
+}
+
+.service-card__cta:hover::after {
+    transform: translateX(3px);
+}
+
+/* Etiqueta de "más pedido" */
+.badge {
+    position: absolute;
+    top: -1px;
+    right: 1.25rem;
+    padding: 0.25rem 0.7rem;
+    background: var(--gold);
+    color: #141414;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-radius: 0 0 var(--radius) var(--radius);
+}
+
+/* --- Campos de formulario ----------------------------------------------- */
+
+.label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.label-optional {
+    font-weight: 400;
+    color: var(--text-dim);
+}
+
+.input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    background: var(--bg);
+    color: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: 1rem;
+    transition: border-color var(--transition),
+                box-shadow var(--transition);
+}
+
+.input::placeholder {
+    color: var(--text-dim);
+}
+
+.input:hover {
+    border-color: var(--border-strong);
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.15);
+}
+
+/* Campo marcado como inválido.
+   aria-invalid lo pone el JavaScript, y el CSS lo muestra. */
+.input[aria-invalid='true'] {
+    border-color: var(--danger);
+}
+
+.input[aria-invalid='true']:focus {
+    box-shadow: 0 0 0 3px rgba(224, 92, 92, 0.18);
+}
+
+textarea.input {
+    resize: vertical;
+    min-height: 90px;
+}
+
+/* El input date se ve oscuro en algunos navegadores */
+.input[type='date']::-webkit-calendar-picker-indicator {
+    filter: invert(0.75);
+    cursor: pointer;
+}
+
+.field {
+    margin-bottom: 1.25rem;
+}
+
+.field-help {
+    margin: 0.4rem 0 0;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+}
+
+.field-error {
+    margin: 0.4rem 0 0;
+    font-size: 0.85rem;
+    color: var(--danger);
+    min-height: 1.2em;   /* Evita que el texto salte al aparecer */
+}
+
+.field-error:empty {
+    min-height: 0;
+}
+
+/* --- Selector de servicio (radio buttons accesibles) -------------------- */
+
+.service-picker {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.service-option {
+    position: relative;
+}
+
+.service-option__input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.service-option__label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.15rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: border-color var(--transition),
+                background-color var(--transition);
+}
+
+.service-option__label:hover {
+    border-color: var(--border-strong);
+    background: var(--surface);
+}
+
+.service-option__input:checked + .service-option__label {
+    border-color: var(--gold);
+    background: rgba(201, 162, 39, 0.07);
+}
+
+.service-option__input:focus-visible + .service-option__label {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+}
+
+.service-option__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.service-option__name {
+    font-weight: 700;
+    font-size: 0.98rem;
+}
+
+.service-option__price {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--gold);
+    white-space: nowrap;
+}
+
+/* --- Grilla de horarios ------------------------------------------------- */
+
+.slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(94px, 1fr));
+    gap: 0.6rem;
+}
+
+.slot-btn {
+    padding: 0.7rem 0.4rem;
+    background: var(--bg);
+    color: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.92rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    transition: border-color var(--transition),
+                background-color var(--transition),
+                color var(--transition);
+}
+
+.slot-btn:hover:not(:disabled) {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+.slot-btn.is-selected {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #141414;
+}
+
+.slot-btn:disabled {
+    color: var(--text-dim);
+    cursor: not-allowed;
+    background: transparent;
+    border-style: dashed;
+    text-decoration: line-through;
+}
+
+.slots-placeholder {
+    padding: 1.5rem;
+    background: var(--bg);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    color: var(--text-dim);
+    font-size: 0.92rem;
+    text-align: center;
+}
+
+.slots-placeholder[hidden] {
+    display: none;
+}
+
+.slots-placeholder.is-info {
+    border-style: solid;
+    border-color: var(--border-strong);
+}
+
+/* --- Avisos de estado del formulario ------------------------------------ */
+
+.form-status {
+    margin-bottom: 1.25rem;
+}
+
+.form-status:empty {
+    display: none;
+}
+
+.alert {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem 1.15rem;
+    border-radius: var(--radius);
+    font-size: 0.92rem;
+    border: 1px solid transparent;
+}
+
+.alert strong {
+    display: block;
+    margin-bottom: 0.15rem;
+}
+
+.alert-error {
+    background: var(--danger-bg);
+    border-color: rgba(224, 92, 92, 0.4);
+    color: #ffb3b3;
+}
+
+.alert-success {
+    background: var(--success-bg);
+    border-color: rgba(76, 175, 125, 0.4);
+    color: #a8e6c4;
+}
+
+.alert-info {
+    background: rgba(201, 162, 39, 0.1);
+    border-color: rgba(201, 162, 39, 0.35);
+    color: var(--gold-light);
+}
+
+.alert-icon {
+    font-size: 1.1rem;
+    line-height: 1.3;
+}
+
+.form-note {
+    margin: 0.9rem 0 0;
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+}
+
+/* --- Días rápidos ------------------------------------------------------- */
+
+.quick-dates {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.85rem;
+    overflow-x: auto;
+    padding-bottom: 0.35rem;
+    -webkit-overflow-scrolling: touch;
+}
+
+.quick-date {
+    flex: 0 0 auto;
+    min-width: 62px;
+    padding: 0.55rem 0.7rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-muted);
+    text-align: center;
+    transition: border-color var(--transition),
+                color var(--transition);
+}
+
+.quick-date:hover {
+    border-color: var(--border-strong);
+    color: var(--cream);
+}
+
+.quick-date.is-selected {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #141414;
+}
+
+.quick-date.is-closed {
+    opacity: 0.4;
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+.quick-date__day {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    opacity: 0.8;
+}
+
+.quick-date__num {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+
+/* ==========================================================================
+   5. SECCIONES
+   ========================================================================== */
+
+/* --- Encabezado del sitio ---------------------------------------------- */
+
+.site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(20, 20, 20, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid transparent;
+    transition: background-color var(--transition),
+                border-color var(--transition);
+}
+
+/* La clase la agrega main.js al hacer scroll */
+.site-header.is-scrolled {
+    background: rgba(20, 20, 20, 0.97);
+    border-bottom-color: var(--border);
+}
+
+.header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    height: 4.5rem;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    color: var(--cream);
+    min-width: 0;
+}
+
+.brand:hover {
+    color: var(--gold);
+}
+
+/* El logo real. Viene con fondo transparente (ver docs/datos-pendientes.md),
+   así que se apoya sobre el fondo oscuro sin ningún recuadro blanco. */
+.brand-mark {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    object-fit: contain;
+}
+
+.brand:hover .brand-mark {
+    opacity: 0.85;
+    transition: opacity var(--transition);
+}
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.brand-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.brand-tagline {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- Menú de navegación ------------------------------------------------- */
+
+.main-nav {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.main-nav ul {
+    display: flex;
+    gap: 1.75rem;
+}
+
+.main-nav a:not(.btn) {
+    position: relative;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: var(--cream);
+    padding: 0.25rem 0;
+}
+
+.main-nav a:not(.btn)::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--transition);
+}
+
+.main-nav a:not(.btn):hover::after,
+.main-nav a:not(.btn):focus-visible::after {
+    transform: scaleX(1);
+}
+
+.nav-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.nav-toggle span {
+    display: block;
+    width: 18px;
+    height: 2px;
+    margin: 0 auto;
+    background: var(--cream);
+    transition: transform var(--transition),
+                opacity var(--transition);
+}
+
+/* Cuando el menú está abierto, las tres barras se vuelven una X */
+.nav-toggle[aria-expanded='true'] span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.nav-toggle[aria-expanded='true'] span:nth-child(2) {
+    opacity: 0;
+}
+
+.nav-toggle[aria-expanded='true'] span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+/* --- Portada ------------------------------------------------------------ */
+
+.hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 100vh;
+    min-height: 100svh;        /* mejor en móviles con barra de direcciones */
+    padding: 7rem 0 5rem;
+    overflow: hidden;
+}
+
+/* Fondo con gradientes. Es CSS puro: no hay imágenes que cargar. */
+.hero-backdrop {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 70% 55% at 78% 22%,
+            rgba(201, 162, 39, 0.13), transparent 62%),
+        radial-gradient(ellipse 60% 50% at 12% 85%,
+            rgba(201, 162, 39, 0.07), transparent 60%),
+        linear-gradient(170deg, #191919 0%, #141414 45%, #101010 100%);
+}
+
+/* Textura sutil de líneas diagonales, evocando la barbería */
+.hero-backdrop::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+        58deg,
+        rgba(201, 162, 39, 0.035) 0px,
+        rgba(201, 162, 39, 0.035) 1px,
+        transparent 1px,
+        transparent 15px
+    );
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 780px;
+}
+
+.hero-eyebrow {
+    margin: 0 0 1.25rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--gold);
+}
+
+.hero-eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 2.5rem;
+    height: 1px;
+    margin-right: 0.9rem;
+    background: var(--gold);
+    vertical-align: middle;
+}
+
+.hero-title {
+    margin: 0 0 1.5rem;
+    font-size: clamp(2.5rem, 7vw, 4.75rem);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.04;
+}
+
+.hero-text {
+    max-width: 30rem;
+    margin-bottom: 2.5rem;
+    font-size: clamp(1rem, 2vw, 1.15rem);
+    color: var(--text-muted);
+}
+
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 4rem;
+}
+
+.hero-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+    padding-top: 2.25rem;
+    border-top: 1px solid var(--border);
+}
+
+.hero-features strong {
+    display: block;
+    margin-bottom: 0.2rem;
+    font-size: 0.92rem;
+    color: var(--cream);
+}
+
+.hero-features span {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+}
+
+.scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    width: 26px;
+    height: 42px;
+    border: 1px solid var(--border-strong);
+    border-radius: 13px;
+}
+
+.scroll-hint span {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 3px;
+    height: 7px;
+    margin-left: -1.5px;
+    background: var(--gold);
+    border-radius: 2px;
+    animation: scrollDown 1.8s ease-in-out infinite;
+}
+
+@keyframes scrollDown {
+    0%, 100% { transform: translateY(0); opacity: 1; }
+    50%      { transform: translateY(13px); opacity: 0.3; }
+}
+
+/* --- Bloque de sección -------------------------------------------------- */
+
+.section {
+    padding: var(--section-gap) 0;
+}
+
+.section-alt {
+    background: var(--bg-alt);
+    /* La franja se ve más limpia si corta los bordes */
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.section-header {
+    max-width: 42rem;
+    margin-bottom: 3.5rem;
+}
+
+.section-eyebrow {
+    margin: 0 0 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--gold);
+}
+
+.section-title {
+    margin: 0 0 1rem;
+    font-size: clamp(1.9rem, 4.5vw, 2.9rem);
+    letter-spacing: -0.03em;
+}
+
+.section-text {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 1.03rem;
+}
+
+.section-footer-cta {
+    margin-top: 3.5rem;
+    text-align: center;
+}
+
+/* --- Servicios ---------------------------------------------------------- */
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 1.25rem;
+}
+
+/* --- Galería ------------------------------------------------------------ */
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.gallery-item {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 0;                 /* <figure> trae margen por defecto */
+    display: flex;
+    align-items: flex-end;
+}
+
+/* Fotos reales.
+   object-fit: cover llena la caja con el formato 4:5 sin deformar la
+   imagen: si la foto es más alta, recorta; si es más baja, recorta arriba
+   y abajo. Es el equivalente de "relleno" en Photoshop. */
+.gallery-item__photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Fondos de los marcadores de posición: degradados CSS, sin fotos falsas. */
+.gallery-item__bg {
+    position: absolute;
+    inset: 0;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gallery-item:hover .gallery-item__photo,
+.gallery-item:hover .gallery-item__bg {
+    transform: scale(1.06);
+}
+
+/* Degradados de ejemplo */
+.tone-1 { background: linear-gradient(145deg, #3a3228, #1e1b17); }
+.tone-2 { background: linear-gradient(145deg, #2e3336, #1a1c1e); }
+.tone-3 { background: linear-gradient(145deg, #38302a, #1d1a17); }
+.tone-4 { background: linear-gradient(145deg, #2b3138, #181b1e); }
+.tone-5 { background: linear-gradient(145deg, #36302c, #1b1917); }
+.tone-6 { background: linear-gradient(145deg, #30352e, #1a1c19); }
+
+.gallery-item__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(10, 10, 10, 0.9), transparent 55%);
+}
+
+.gallery-item__icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: rgba(242, 237, 228, 0.22);
+}
+
+.gallery-item__caption {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    padding: 1.25rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+}
+
+.gallery-item__badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1;
+    padding: 0.25rem 0.6rem;
+    background: rgba(20, 20, 20, 0.75);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+/* --- Reservar ------------------------------------------------------------ */
+
+.booking-layout {
+    display: grid;
+    gap: 2rem;
+    align-items: start;
+}
+
+.booking-form {
+    padding: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.step {
+    margin: 0 0 2rem;
+    padding: 0;
+    border: 0;
+    min-width: 0;   /* los fieldset no se encogen dentro de un grid sin esto */
+}
+
+.step:last-of-type {
+    margin-bottom: 1.5rem;
+}
+
+.step-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0 0 1.25rem;
+    padding: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.7rem;
+    height: 1.7rem;
+    flex-shrink: 0;
+    background: rgba(201, 162, 39, 0.14);
+    border: 1px solid rgba(201, 162, 39, 0.4);
+    border-radius: 50%;
+    color: var(--gold);
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+/* Resumen */
+.booking-summary {
+    padding: 1.75rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.summary-title {
+    margin: 0 0 1.25rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.summary-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.65rem 0;
+}
+
+.summary-row dt {
+    font-size: 0.88rem;
+    color: var(--text-dim);
+}
+
+.summary-row dd {
+    margin: 0;
+    font-weight: 700;
+    text-align: right;
+    color: var(--cream);
+}
+
+.summary-footnote {
+    margin: 1.25rem 0 0;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    text-align: center;
+}
+
+/* --- Contacto ------------------------------------------------------------ */
+
+.contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: 1.5rem;
+}
+
+.contact-card {
+    padding: 1.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.contact-title {
+    margin: 0 0 1.1rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+}
+
+.contact-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 1.1rem;
+    font-style: normal;
+    color: var(--cream);
+}
+
+.contact-text span:last-child:not(:empty) {
+    font-size: 0.88rem;
+    color: var(--text-dim);
+}
+
+.link-arrow {
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.link-arrow span {
+    display: inline-block;
+    transition: transform var(--transition);
+}
+
+.link-arrow:hover span {
+    transform: translateX(4px);
+}
+
+.hours-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.hours-table td {
+    padding: 0.45rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.hours-table tr:last-child td {
+    border-bottom: 0;
+}
+
+.hours-table td:first-child {
+    color: var(--text-muted);
+}
+
+.hours-table td:last-child {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.hours-table tr.is-today td {
+    color: var(--gold);
+    font-weight: 700;
+}
+
+.hours-table .is-closed {
+    color: var(--text-dim);
+}
+
+.contact-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.contact-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--cream);
+    font-size: 0.92rem;
+}
+
+.contact-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    background: rgba(201, 162, 39, 0.12);
+    border: 1px solid rgba(201, 162, 39, 0.3);
+    border-radius: 50%;
+    color: var(--gold);
+    font-size: 0.9rem;
+}
+
+
+/* ==========================================================================
+   6. PIE DE PÁGINA
+   ========================================================================== */
+
+.site-footer {
+    padding: 4rem 0 2rem;
+    background: #101010;
+    border-top: 1px solid var(--border);
+}
+
+.footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2rem;
+    padding-bottom: 2.5rem;
+}
+
+.footer-brand .brand-name {
+    font-size: 1.15rem;
+}
+
+/* Logo del pie, más grande que en el encabezado */
+.footer-logo {
+    width: 88px;
+    height: 88px;
+    margin-bottom: 0.9rem;
+    object-fit: contain;
+}
+
+.footer-tagline {
+    margin: 0.35rem 0 0;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+}
+
+.footer-nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.footer-nav a {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+}
+
+.footer-nav a:hover {
+    color: var(--gold);
+}
+
+.footer-social {
+    display: flex;
+    gap: 0.65rem;
+}
+
+.social-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    color: var(--cream);
+    transition: border-color var(--transition),
+                color var(--transition),
+                background-color var(--transition);
+}
+
+.social-btn:hover {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #141414;
+}
+
+.footer-bottom {
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--border);
+}
+
+.footer-copy {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+}
+
+.footer-admin {
+    margin: 0.7rem 0 0;
+    font-size: 0.78rem;
+}
+
+.footer-admin a {
+    color: var(--text-dim);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-decoration-color: rgba(122, 117, 112, 0.55);
+    text-underline-offset: 0.2em;
+    transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.footer-admin a:hover {
+    color: var(--gold);
+    text-decoration-color: currentColor;
+}
+
+.footer-notice {
+    margin: 1rem 0 0;
+    padding: 0.85rem 1rem;
+    background: rgba(201, 162, 39, 0.08);
+    border: 1px solid rgba(201, 162, 39, 0.28);
+    border-radius: var(--radius);
+    font-size: 0.84rem;
+    color: var(--text-muted);
+}
+
+.footer-notice strong {
+    color: var(--gold);
+}
+
+.footer-notice[hidden] {
+    display: none;
+}
+
+
+/* ==========================================================================
+   7. RESPONSIVE
+   Mobile-first: las reglas base son para pantallas chicas y recién
+   después se van ampliando. El menú hamburguesa aparece hasta los 860px.
+   ========================================================================== */
+
+/* --- Móvil: el menú se oculta tras el botón hamburguesa --- */
+@media (max-width: 860px) {
+    .main-nav {
+        position: fixed;
+        top: 4.5rem;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        padding: 1rem 1.5rem 1.75rem;
+        background: rgba(20, 20, 20, 0.98);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+
+        /* Oculto por defecto; main.js lo muestra con aria-expanded */
+        display: none;
+    }
+
+    .main-nav.is-open {
+        display: flex;
+    }
+
+    .main-nav ul {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .main-nav li {
+        border-bottom: 1px solid var(--border);
+    }
+
+    .main-nav a:not(.btn) {
+        display: block;
+        padding: 1rem 0;
+        font-size: 1rem;
+    }
+
+    /* El subrayado animado no tiene sentido en el menú móvil */
+    .main-nav a:not(.btn)::after {
+        display: none;
+    }
+
+    .nav-cta {
+        margin-top: 1.25rem;
+    }
+
+    .nav-toggle {
+        display: flex;
+    }
+
+    .brand-tagline {
+        display: none;
+    }
+
+    /* El resumen pasa debajo del formulario */
+    .booking-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .booking-form {
+        padding: 1.5rem;
+    }
+}
+
+/* --- Móvil chico --- */
+@media (max-width: 480px) {
+    .hero {
+        padding: 6rem 0 4rem;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+    }
+
+    .hero-actions .btn {
+        width: 100%;
+    }
+
+    .hero-features {
+        grid-template-columns: 1fr;
+        gap: 1.1rem;
+    }
+
+    .booking-form,
+    .booking-summary {
+        padding: 1.25rem;
+    }
+
+    .slots-grid {
+        grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
+    }
+
+    .step-title {
+        font-size: 0.98rem;
+    }
+}
+
+/* --- Tablet --- */
+@media (min-width: 861px) and (max-width: 1080px) {
+    .main-nav {
+        gap: 1.25rem;
+    }
+
+    .main-nav ul {
+        gap: 1.25rem;
+    }
+}
+
+/* --- Computadora --- */
+@media (min-width: 1024px) {
+    .booking-layout {
+        grid-template-columns: minmax(0, 1fr) 320px;
+    }
+
+    /* El resumen acompaña al scroll mientras se completa el formulario */
+    .booking-summary {
+        position: sticky;
+        top: 6rem;
+    }
+}
+
+/* --- Pantallas muy altas --- */
+@media (min-height: 1000px) {
+    .hero {
+        min-height: 90vh;
+    }
+}
+
+
+/* ==========================================================================
+   8. PREFERENCIAS DEL USUARIO
+   ========================================================================== */
+
+/* Respeta a quien pidió menos movimiento en el sistema.
+   Es una accesibilidad real: el scroll suave y las animaciones
+   pueden tardar o resultar incómodos. */
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .scroll-hint span {
+        animation: none;
+    }
+}
+
+/* Al imprimir: fondo blanco y texto oscuro */
+@media print {
+    .site-header,
+    .nav-toggle,
+    .hero-actions,
+    .booking-form button,
+    .scroll-hint,
+    .footer-social {
+        display: none !important;
+    }
+
+    body {
+        background: #fff;
+        color: #000;
+    }
+
+    .section,
+    .hero {
+        min-height: auto;
+        padding: 2rem 0;
+    }
+}

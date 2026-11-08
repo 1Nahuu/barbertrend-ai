@@ -1,0 +1,573 @@
+/* ==========================================================================
+   BarberTrend AI — Estilos del panel del barbero
+   ==========================================================================
+
+   Se carga DESPUÉS de styles.css, así que reutiliza sus variables de color,
+   tipografía, medidas y las clases de botones, campos y avisos
+   (.btn, .input, .field, .label, .form-status, .alert, .container).
+
+   Acá va solo lo específico del login y del panel, para no mezclar estilos
+   del sitio público con los del área privada.
+   ========================================================================== */
+
+/* ==========================================================================
+   1. Fondo general
+   ========================================================================== */
+
+.admin-body {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 50% 0%,
+                        rgba(201, 162, 39, 0.08),
+                        transparent 55%),
+        var(--bg);
+}
+
+/* ==========================================================================
+   2. Login
+   ========================================================================== */
+
+.login-page {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: clamp(1.25rem, 5vw, 3rem);
+}
+
+.login-card {
+    width: min(100%, 420px);
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+.login-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    margin-bottom: 1.75rem;
+    color: inherit;
+}
+
+.login-brand:hover {
+    color: inherit;
+}
+
+.login-brand img {
+    width: 56px;
+    height: auto;
+}
+
+.login-brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+}
+
+.login-brand-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: -0.01em;
+}
+
+.login-brand-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+}
+
+.login-title {
+    margin-bottom: 0.35rem;
+    font-size: 1.6rem;
+}
+
+.login-text {
+    margin-bottom: 1.5rem;
+    color: var(--text-muted);
+    font-size: 0.92rem;
+}
+
+.login-form .field:last-of-type {
+    margin-bottom: 1.5rem;
+}
+
+.login-back {
+    margin: 1.5rem 0 0;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+.login-back a {
+    color: var(--text-muted);
+}
+
+.login-back a:hover {
+    color: var(--gold);
+}
+
+/* ==========================================================================
+   3. Panel del barbero
+   ========================================================================== */
+
+.panel-shell {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-header {
+    background: rgba(20, 20, 20, 0.92);
+    border-bottom: 1px solid var(--border);
+}
+
+.panel-header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 72px;
+}
+
+.panel-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: inherit;
+}
+
+.panel-brand:hover {
+    color: inherit;
+}
+
+.panel-brand img {
+    width: 42px;
+    height: auto;
+}
+
+.panel-brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.panel-brand-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.98rem;
+}
+
+.panel-brand-sub {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.logout-form {
+    margin: 0;
+}
+
+/*
+ * El botón "Salir" usa btn-outline, cuyo borde por defecto (#454545) casi no
+ * se distingue sobre el encabezado oscuro. Acá se le da el color dorado para
+ * que se vea claramente, sin convertirlo en la acción principal del panel.
+ */
+.logout-form .btn-outline {
+    border-color: var(--gold);
+    color: var(--gold);
+    background-color: rgba(201, 162, 39, 0.08);
+}
+
+.logout-form .btn-outline:hover:not(:disabled) {
+    border-color: var(--gold);
+    background-color: var(--gold);
+    color: #141414;
+}
+
+.panel-main {
+    flex: 1;
+    padding-top: clamp(2rem, 5vw, 3.5rem);
+    padding-bottom: clamp(2rem, 5vw, 3.5rem);
+}
+
+.panel-title {
+    margin-bottom: 0.35rem;
+    font-size: clamp(1.6rem, 4vw, 2.1rem);
+}
+
+.panel-intro {
+    margin-bottom: 2rem;
+    color: var(--text-muted);
+}
+
+.panel-card {
+    max-width: 640px;
+    padding: 1.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.panel-card-title {
+    font-size: 1.1rem;
+}
+
+.panel-card-text {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.panel-footer {
+    padding: 1.25rem 0;
+    border-top: 1px solid var(--border);
+    font-size: 0.85rem;
+}
+
+/* ==========================================================================
+   3.1 Turnos del panel
+   ========================================================================== */
+
+.panel-appointments {
+    max-width: none;
+}
+
+.panel-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.panel-card-head .panel-card-text {
+    margin: 0;
+}
+
+.appointments-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 1.25rem 0 0.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+.appointments-toolbar .label {
+    margin: 0;
+}
+
+.input-sm {
+    width: auto;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+}
+
+.appointments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.appointments-empty {
+    margin: 0;
+    padding: 1.25rem;
+    color: var(--text-muted);
+    text-align: center;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-md);
+}
+
+.appointment {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 1rem 1.15rem;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.appointment-main {
+    flex: 1 1 16rem;
+    min-width: 0;
+}
+
+.appointment-head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.35rem;
+}
+
+.appointment-when {
+    font-weight: 700;
+}
+
+.appointment-name {
+    margin: 0 0 0.2rem;
+    font-size: 1.05rem;
+}
+
+.appointment-meta,
+.appointment-notes {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+}
+
+.appointment-notes {
+    margin-top: 0.35rem;
+}
+
+.appointment-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.6rem;
+}
+
+.appointment-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+/* --- Estado del turno --- */
+
+.status-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-radius: 999px;
+    border: 1px solid transparent;
+}
+
+.status-badge.is-pending {
+    color: var(--gold-light);
+    background: rgba(201, 162, 39, 0.14);
+    border-color: rgba(201, 162, 39, 0.4);
+}
+
+.status-badge.is-confirmed {
+    color: var(--success);
+    background: var(--success-bg);
+    border-color: rgba(76, 175, 125, 0.4);
+}
+
+.status-badge.is-completed {
+    color: var(--text-muted);
+    background: rgba(168, 162, 154, 0.12);
+    border-color: var(--border-strong);
+}
+
+.status-badge.is-cancelled {
+    color: var(--danger);
+    background: var(--danger-bg);
+    border-color: rgba(224, 92, 92, 0.4);
+}
+
+/* --- Botones propios del panel --- */
+
+.btn-whatsapp {
+    border-color: #2f9e57;
+    color: #7ed9a0;
+    background-color: rgba(47, 158, 87, 0.12);
+}
+
+.btn-whatsapp:hover:not(:disabled) {
+    border-color: #2f9e57;
+    background-color: #2f9e57;
+    color: #0b1f13;
+}
+
+.btn-danger {
+    border-color: var(--danger);
+    color: var(--danger);
+    background-color: var(--danger-bg);
+}
+
+.btn-danger:hover:not(:disabled) {
+    border-color: var(--danger);
+    background-color: var(--danger);
+    color: #1a0d0d;
+}
+
+/* ==========================================================================
+   3.2 Cierres y bloqueos
+   ========================================================================== */
+
+.panel-blocks {
+    max-width: none;
+    margin-top: 1.5rem;
+}
+
+.block-form {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+.block-form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+/* El atributo hidden tiene que ganarle al display:grid de la fila. */
+.block-form-row[hidden] {
+    display: none;
+}
+
+.checkbox-field {
+    margin-top: -0.35rem;
+}
+
+.checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: var(--cream);
+    font-size: 0.92rem;
+    cursor: pointer;
+}
+
+.checkbox-label input {
+    width: 1.05rem;
+    height: 1.05rem;
+    margin: 0;
+    accent-color: var(--gold);
+}
+
+.block-form-actions {
+    margin-top: 0.25rem;
+}
+
+.blocks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.block-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 1rem 1.15rem;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.block-main {
+    flex: 1 1 16rem;
+    min-width: 0;
+}
+
+.block-when {
+    margin: 0;
+    font-weight: 700;
+}
+
+.block-reason {
+    margin: 0.25rem 0 0;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+}
+
+.block-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+/* ==========================================================================
+   3.3 Diálogo de cancelación
+   ========================================================================== */
+
+.panel-dialog {
+    width: min(100% - 2rem, 460px);
+    padding: 1.75rem;
+    color: var(--cream);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+.panel-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.65);
+}
+
+.panel-dialog-title {
+    margin-bottom: 0.35rem;
+    font-size: 1.25rem;
+}
+
+.panel-dialog-text {
+    margin-bottom: 1.1rem;
+    color: var(--text-muted);
+    font-size: 0.92rem;
+}
+
+.panel-dialog .field-error {
+    min-height: 1.1rem;
+    margin: 0.3rem 0 0;
+}
+
+.panel-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    margin-top: 1.25rem;
+}
+
+/* ==========================================================================
+   4. Responsive
+   ========================================================================== */
+
+@media (max-width: 520px) {
+    .panel-brand-sub {
+        display: none;
+    }
+
+    .panel-brand img {
+        width: 34px;
+    }
+
+    .appointment-side {
+        align-items: stretch;
+        width: 100%;
+    }
+
+    .appointment-actions {
+        justify-content: flex-start;
+    }
+
+    .block-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .block-actions .btn {
+        width: 100%;
+    }
+}

@@ -1,0 +1,47 @@
+# ==========================================================================
+# BarberTrend AI — archivos que NUNCA deben subirse al repositorio
+# ==========================================================================
+
+# --- Secretos y configuración local -------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.jks
+secrets/
+
+# --- Java / Maven --------------------------------------------------------
+target/
+!.mvn/wrapper/maven-wrapper.jar
+*.class
+*.jar
+*.war
+*.log
+logs/
+
+# --- IDEs ----------------------------------------------------------------
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.project
+.classpath
+.factorypath
+
+# --- Sistema operativo ---------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Datos locales de desarrollo ----------------------------------------
+*.mv.db
+*.trace.db
+barbertrend-local/
+
+# --- Material de trabajo --------------------------------------------------
+# Fotos originales de WhatsApp y capturas: no forman parte de la aplicación.
+# Las imágenes que usa el sitio están en static/assets/img/.
+barberia doble s/

@@ -1,0 +1,3 @@
+cd backend
+.\mvnw.cmd spring-boot:run
+luego ir a localhost:8080 en web para abrir

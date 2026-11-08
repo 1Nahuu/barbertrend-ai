@@ -1,0 +1,37 @@
+# Perfil de producción.
+#
+# Se activa con:  SPRING_PROFILES_ACTIVE=prod
+#
+# Acá NO hay valores de conexión: salen todos del entorno (.env o las
+# variables del servidor). Si falta alguna, la aplicación arranca igual pero
+# sin base de datos, que es justo lo que se quiere ver en un despliegue mal
+# configurado: falla al usar el sistema, no al describirlo en un log.
+
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      # La app es de un solo usuario y poca carga. Un pool chico alcanza
+      # y deja memoria libre para lo demás.
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 10000
+  flyway:
+    enabled: true
+    # En producción Flyway nunca borra ni altera datos por su cuenta.
+    # Si falta una migración, la aplicación no arranca: es preferible a que
+    # arranque con un esquema medio viejo.
+    clean-disabled: true
+
+server:
+  # HTTPS se resuelve en el proxy o en el servidor delante de la app.
+  forward-headers-strategy: framework
+
+logging:
+  level:
+    root: INFO
+    com.barbertrend: INFO
+  file:
+    name: ${LOG_FILE:logs/barbertrend.log}

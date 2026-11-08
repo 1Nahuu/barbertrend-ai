@@ -1,0 +1,20 @@
+# Perfil de pruebas.
+#
+# H2 EN MEMORIA: cada vez que se ejecutan las pruebas arranca una base
+# nueva y se tira al terminar. Así una prueba no ve los datos de otra y el
+# resultado no depende del orden en que se ejecuten.
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:barbertrend-test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  flyway:
+    enabled: true
+
+logging:
+  level:
+    root: WARN
+    com.barbertrend: INFO
+    org.hibernate.SQL: WARN

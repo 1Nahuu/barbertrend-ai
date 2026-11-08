@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>BarberTrend AI — Documentación del proyecto</title>
+<style>
+    /* =======================================================================
+       Estilos pensados para impresión (A4). El PDF se genera con:
+       google-chrome --headless --print-to-pdf ...
+       ======================================================================= */
+
+    @page {
+        size: A4;
+        margin: 18mm 16mm 16mm 16mm;
+    }
+
+    :root {
+        --ink: #1c1a17;
+        --muted: #5f5a52;
+        --line: #d8d2c6;
+        --gold: #a8862a;
+        --gold-soft: #f3edda;
+        --dark: #15130f;
+        --ok: #1f7a4d;
+        --ok-bg: #e7f4ec;
+        --warn: #9a6b00;
+        --warn-bg: #fbf1d8;
+        --off: #7a756d;
+        --off-bg: #efece6;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        color: var(--ink);
+        font-size: 10.5pt;
+        line-height: 1.5;
+    }
+
+    h1, h2, h3, h4 {
+        font-family: Georgia, "Times New Roman", serif;
+        color: var(--dark);
+        line-height: 1.2;
+    }
+
+    h1 { font-size: 21pt; margin: 0 0 6pt; }
+    h2 {
+        font-size: 15pt;
+        margin: 22pt 0 8pt;
+        padding-bottom: 4pt;
+        border-bottom: 2px solid var(--gold);
+        page-break-after: avoid;
+    }
+    h3 {
+        font-size: 12pt;
+        margin: 14pt 0 4pt;
+        color: #3a352d;
+        page-break-after: avoid;
+    }
+    h4 {
+        font-size: 10.5pt;
+        margin: 10pt 0 3pt;
+        color: #3a352d;
+        page-break-after: avoid;
+    }
+
+    p { margin: 0 0 7pt; }
+    ul, ol { margin: 0 0 8pt; padding-left: 16pt; }
+    li { margin-bottom: 3pt; }
+
+    a { color: #7a5b00; text-decoration: none; }
+
+    code {
+        font-family: "Cascadia Mono", Consolas, "Courier New", monospace;
+        font-size: 9pt;
+        background: #f2efe9;
+        padding: 1px 3px;
+        border-radius: 3px;
+    }
+
+    pre {
+        font-family: "Cascadia Mono", Consolas, "Courier New", monospace;
+        font-size: 8.5pt;
+        line-height: 1.4;
+        background: #f7f5f0;
+        border: 1px solid var(--line);
+        border-left: 3px solid var(--gold);
+        border-radius: 4px;
+        padding: 8pt 10pt;
+        margin: 6pt 0 10pt;
+        white-space: pre-wrap;
+        page-break-inside: avoid;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 6pt 0 12pt;
+        font-size: 9.2pt;
+        page-break-inside: auto;
+    }
+    th, td {
+        border: 1px solid var(--line);
+        padding: 4pt 6pt;
+        text-align: left;
+        vertical-align: top;
+    }
+    th {
+        background: var(--gold-soft);
+        font-weight: 600;
+        color: #4a3c12;
+    }
+    tr { page-break-inside: avoid; }
+
+    .callout {
+        border: 1px solid var(--line);
+        border-left: 4px solid var(--gold);
+        background: #faf8f2;
+        border-radius: 4px;
+        padding: 8pt 10pt;
+        margin: 8pt 0;
+        page-break-inside: avoid;
+    }
+    .callout strong { color: #5a4410; }
+
+    .badge {
+        display: inline-block;
+        font-size: 8pt;
+        font-weight: 700;
+        padding: 1px 6px;
+        border-radius: 10px;
+        border: 1px solid transparent;
+        white-space: nowrap;
+    }
+    .b-ok   { color: var(--ok);   background: var(--ok-bg);   border-color: #b6d9c4; }
+    .b-warn { color: var(--warn); background: var(--warn-bg); border-color: #e6cf94; }
+    .b-off  { color: var(--off);  background: var(--off-bg);  border-color: #d5cfc4; }
+
+    /* ---------------- Portada ---------------- */
+    .cover {
+        background: var(--dark);
+        color: #f3efe6;
+        margin: -18mm -16mm 0 -16mm;
+        padding: 60mm 18mm 22mm 18mm;
+        height: 297mm;
+        page-break-after: always;
+        position: relative;
+    }
+    .cover .kicker {
+        color: var(--gold);
+        font-size: 10pt;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        margin-bottom: 6pt;
+    }
+    .cover h1 {
+        color: #fdfbf6;
+        font-size: 40pt;
+        margin: 0 0 4pt;
+    }
+    .cover .sub {
+        color: #cfc7b7;
+        font-size: 14pt;
+        font-family: Georgia, serif;
+        margin-bottom: 26pt;
+    }
+    .cover .rule {
+        width: 70pt;
+        height: 3px;
+        background: var(--gold);
+        margin: 18pt 0;
+    }
+    .cover .meta {
+        color: #b9b1a1;
+        font-size: 10pt;
+        line-height: 1.9;
+    }
+    .cover .meta b { color: #f0eadf; }
+    .cover .footer {
+        position: absolute;
+        bottom: 20mm;
+        left: 18mm;
+        right: 18mm;
+        color: #8f8779;
+        font-size: 8.5pt;
+        border-top: 1px solid #3a352c;
+        padding-top: 8pt;
+    }
+
+    /* ---------------- Índice ---------------- */
+    .toc { page-break-after: always; }
+    .toc ol { list-style: none; padding-left: 0; counter-reset: none; }
+    .toc li {
+        padding: 3pt 0;
+        border-bottom: 1px dotted var(--line);
+        font-size: 10pt;
+    }
+    .toc li .num {
+        display: inline-block;
+        width: 26pt;
+        color: var(--gold);
+        font-weight: 700;
+    }
+
+    .lead {
+        font-size: 11pt;
+        color: #3a352d;
+    }
+
+    .section { page-break-before: always; }
+    .nobreak { page-break-inside: avoid; }
+
+    .two-col { display: flex; gap: 14pt; }
+    .two-col > div { flex: 1; }
+
+    .kv { margin: 0 0 10pt; }
+    .kv td:first-child { width: 34%; font-weight: 600; background: #faf8f2; }
+</style>
+</head>
+<body>
+
+<!-- ===================================================================== -->
+<!-- PORTADA                                                               -->
+<!-- ===================================================================== -->
+<section class="cover">
+    <div class="kicker">Documentación técnica</div>
+    <h1>BarberTrend&nbsp;AI</h1>
+    <div class="sub">Sistema de reservas y marketing con IA para Doble S Barbería</div>
+    <div class="rule"></div>
+    <div class="meta">
+        <div><b>Estado:</b> Etapa 3 cerrada · avisos funcionando</div>
+        <div><b>Fecha:</b> 23 de octubre de 2026</div>
+        <div><b>Stack:</b> Java 21 · Spring Boot 4.1.1 · H2 / PostgreSQL</div>
+        <div><b>Pruebas:</b> 30 de 30 en verde</div>
+        <div><b>Documento:</b> alcance actual + hoja de ruta</div>
+    </div>
+    <div class="footer">
+        Proyecto académico y de uso real. Los datos del negocio que figuran
+        aquí fueron aportados y confirmados por el dueño; el resto está
+        rotulado como dato de ejemplo.
+    </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- ÍNDICE                                                                -->
+<!-- ===================================================================== -->
+<section class="toc">
+    <h2 style="margin-top:0;">Contenido</h2>
+    <ol>
+        <li><span class="num">1</span> Resumen ejecutivo</li>
+        <li><span class="num">2</span> El producto</li>
+        <li><span class="num">3</span> Datos reales del negocio</li>
+        <li><span class="num">4</span> Stack tecnológico</li>
+        <li><span class="num">5</span> Arquitectura</li>
+        <li><span class="num">6</span> Estado por etapas</li>
+        <li><span class="num">7</span> Lo que ya está hecho</li>
+        <li><span class="num">8</span> La garantía anti-superposición de turnos</li>
+        <li><span class="num">9</span> Seguridad</li>
+        <li><span class="num">10</span> API REST</li>
+        <li><span class="num">11</span> Modelo de datos</li>
+        <li><span class="num">12</span> Pruebas automatizadas</li>
+        <li><span class="num">13</span> Cómo ejecutar y probar</li>
+        <li><span class="num">14</span> Configuración (variables de entorno)</li>
+        <li><span class="num">15</span> Hoja de ruta: lo que viene</li>
+        <li><span class="num">16</span> Deuda técnica y límites conocidos</li>
+        <li><span class="num">17</span> Datos del negocio pendientes</li>
+    </ol>
+
+    <div class="callout" style="margin-top:20pt;">
+        <strong>Cómo leer este documento.</strong> Las secciones 1 a 6 dan el
+        panorama. Las secciones 7 a 12 explican lo implementado y por qué. Las
+        secciones 13 a 17 son prácticas: cómo correrlo, cómo configurarlo, qué
+        falta y hacia dónde va.
+    </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 1. RESUMEN                                                            -->
+<!-- ===================================================================== -->
+<section>
+    <h2>1. Resumen ejecutivo</h2>
+
+    <p class="lead">
+        BarberTrend AI es una aplicación web para una barbería masculina que
+        combina dos módulos: un <strong>sistema de reservas online</strong> y,
+        más adelante, un <strong>asistente de marketing con IA</strong> para
+        detectar tendencias y generar contenido para redes.
+    </p>
+
+    <p>
+        Hoy el primero de esos módulos ya está operativo de punta a punta:
+    </p>
+
+    <ul>
+        <li>La web pública muestra los servicios, precios, horarios, galería y
+            contacto con <strong>datos reales</strong> de la barbería.</li>
+        <li>Un cliente puede <strong>reservar un turno de verdad</strong>. La
+            disponibilidad la calcula el backend y el sistema garantiza que dos
+            personas no puedan quedarse con el mismo horario.</li>
+        <li>El barbero entra a un <strong>panel privado</strong>, ve los turnos
+            y los puede <strong>confirmar, completar o cancelar</strong>.</li>
+        <li>Cuando entra un turno nuevo, el barbero recibe un <strong>aviso por
+            email</strong> en forma automática.</li>
+        <li>Al confirmar, el panel le da un <strong>enlace de WhatsApp</strong>
+            con el mensaje ya escrito para avisarle al cliente: se envía con un
+            toque, sin costo y sin depender de la API de Meta.</li>
+    </ul>
+
+    <p>
+        El sistema es <strong>100 % gratuito</strong> en su operación actual: no
+        usa servicios pagos, y el único requisito para recibir emails es una
+        cuenta de Gmail con contraseña de aplicación (también gratuita).
+    </p>
+
+    <div class="callout">
+        <strong>Alcance de este documento.</strong> Describe todo lo construido
+        y verificado hasta la fecha y traza el camino de las etapas siguientes.
+        No marca como terminado nada que no esté probado: el estado de cada
+        punto está indicado con <span class="badge b-ok">Listo</span>,
+        <span class="badge b-warn">Parcial</span> o
+        <span class="badge b-off">Pendiente</span>.
+    </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 2. EL PRODUCTO                                                        -->
+<!-- ===================================================================== -->
+<section>
+    <h2>2. El producto</h2>
+
+    <p>
+        El proyecto se pensó como un producto útil para un negocio real (una
+        barbería familiar) y, a la vez, como proyecto de portfolio reutilizable
+        para otras barberías. La estrategia fue construir por etapas, sin
+        incorporar tecnologías nuevas hasta que hicieran falta.
+    </p>
+
+    <h3>2.1 Sistema de reservas</h3>
+    <ul>
+        <li>Web pública responsive con catálogo de servicios y precios.</li>
+        <li>Selección de fecha y horario, con disponibilidad calculada en el
+            servidor.</li>
+        <li>Reserva de turnos con datos básicos del cliente.</li>
+        <li>Garantía de que no se superpongan dos turnos.</li>
+        <li>Consulta del estado de un turno mediante un código.</li>
+        <li>Panel administrativo privado para gestionar la agenda.</li>
+        <li>Avisos al barbero y al cliente.</li>
+    </ul>
+
+    <h3>2.2 Asistente de marketing (etapa posterior)</h3>
+    <ul>
+        <li>Detección de tendencias del rubro a partir de fuentes verificables.</li>
+        <li>Ideas y guiones breves para Reels e historias.</li>
+        <li>Captions y hashtags; recomendaciones periódicas.</li>
+        <li>Historial de sugerencias y registro de resultados.</li>
+    </ul>
+
+    <div class="callout">
+        <strong>Regla de oro del proyecto:</strong> la IA debe generar contenido
+        a partir de información disponible y verificable. No se inventan
+        tendencias, estadísticas, enlaces ni métricas. Cada dato se distingue
+        entre <em>verificado</em>, <em>estimado</em>, <em>sugerencia creativa</em>
+        o <em>no obtenido</em>.
+    </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 3. DATOS REALES                                                       -->
+<!-- ===================================================================== -->
+<section>
+    <h2>3. Datos reales del negocio</h2>
+
+    <p>
+        Ninguno de estos datos es inventado: fueron aportados o confirmados por
+        el dueño y ya están cargados en la aplicación.
+    </p>
+
+    <table class="kv">
+        <tr><td>Nombre</td><td>Doble S Barbería</td></tr>
+        <tr><td>Instagram</td><td>@Barberia_doble_s</td></tr>
+        <tr><td>WhatsApp</td><td>+54 9 2284 239845</td></tr>
+        <tr><td>Teléfonos</td><td>2284 239845 · 2284 245945</td></tr>
+        <tr><td>Dirección</td><td>Bolívar 3008 <em>(guardada; se usa en los mensajes de confirmación)</em></td></tr>
+        <tr><td>Logo</td><td>PNG con fondo transparente (generado a partir del JPEG original)</td></tr>
+        <tr><td>Galería</td><td>4 fotos reales de cortes, optimizadas</td></tr>
+    </table>
+
+    <h3>Horario de atención</h3>
+    <table>
+        <tr><th>Día</th><th>Horario</th></tr>
+        <tr><td>Lunes a sábado</td><td>09:00 – 21:00</td></tr>
+        <tr><td>Domingo</td><td>Cerrado</td></tr>
+    </table>
+
+    <h3>Catálogo de servicios (precios reales)</h3>
+    <table>
+        <tr><th>Servicio</th><th>Duración interna</th><th>Precio</th></tr>
+        <tr><td>Corte clásico</td><td>30 min</td><td>$ 12.000</td></tr>
+        <tr><td>Barba completa</td><td>30 min</td><td>$ 12.000</td></tr>
+        <tr><td>Corte + barba</td><td>60 min</td><td>$ 15.000</td></tr>
+        <tr><td>Corte infantil</td><td>30 min</td><td>$ 9.000</td></tr>
+    </table>
+
+    <div class="callout">
+        <strong>Las duraciones no se muestran al cliente.</strong> Un corte no
+        dura siempre lo mismo. Pero el dato <em>sí</em> existe en el modelo,
+        porque el sistema lo necesita para saber cuántos bloques de 30 minutos
+        ocupa el turno y así calcular la disponibilidad y evitar
+        superposiciones.
+    </div>
+
+    <h3>Lo único que sigue siendo de ejemplo</h3>
+    <p>
+        Los textos de portada y el eslogan. Son redaccionables y se reemplazan
+        sin tocar código.
+    </p>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 4. STACK                                                              -->
+<!-- ===================================================================== -->
+<section>
+    <h2>4. Stack tecnológico</h2>
+
+    <table>
+        <tr><th>Componente</th><th>Elección</th><th>Motivo</th></tr>
+        <tr>
+            <td>Lenguaje</td><td>Java 21 (LTS)</td>
+            <td>Versión estable y de soporte largo; base de Spring Boot.</td>
+        </tr>
+        <tr>
+            <td>Framework backend</td><td>Spring Boot 4.1.1</td>
+            <td>Última estable al iniciar. Trae servidor web, seguridad, JPA y
+                validación integrados.</td>
+        </tr>
+        <tr>
+            <td>Build</td><td>Maven (wrapper <code>mvnw</code>)</td>
+            <td>No requiere instalar Maven: el wrapper lo descarga.</td>
+        </tr>
+        <tr>
+            <td>Base de datos · desarrollo/pruebas</td><td>H2</td>
+            <td>Cero instalación. En pruebas es en memoria (aislada); en
+                desarrollo, en archivo.</td>
+        </tr>
+        <tr>
+            <td>Base de datos · producción</td><td>PostgreSQL 18</td>
+            <td>Datos concurrentes, persistentes y respaldables.</td>
+        </tr>
+        <tr>
+            <td>Migraciones</td><td>Flyway</td>
+            <td>Un único juego de SQL para ambos motores. El esquema nunca lo
+                cambia Hibernate.</td>
+        </tr>
+        <tr>
+            <td>Frontend</td><td>HTML, CSS y JavaScript</td>
+            <td>Sin frameworks ni dependencias: liviano, rápido en celulares y
+                fácil de mantener.</td>
+        </tr>
+        <tr>
+            <td>Seguridad</td><td>Spring Security (sesión + BCrypt)</td>
+            <td>Suficiente y simple para un panel único.</td>
+        </tr>
+        <tr>
+            <td>Email</td><td>SMTP (Gmail en desarrollo)</td>
+            <td>Gratuito con contraseña de aplicación.</td>
+        </tr>
+    </table>
+
+    <div class="callout">
+        <strong>Decisiones que se evitaron a propósito:</strong> React,
+        microservicios, Redis, Docker y cualquier servicio pago. No aportan
+        valor real en esta escala y agregan complejidad y costo.
+    </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 5. ARQUITECTURA                                                       -->
+<!-- ===================================================================== -->
+<section>
+    <h2>5. Arquitectura</h2>
+
+    <h3>5.1 Capas</h3>
+    <p>
+        El backend está separado en responsabilidades claras. Cada capa sólo
+        conoce a la de abajo:
+    </p>
+    <table>
+        <tr><th>Capa</th><th>Paquete</th><th>Responsabilidad</th></tr>
+        <tr><td>Controladores</td><td><code>web/</code></td><td>Reciben la petición HTTP y devuelven JSON o páginas. No contienen reglas de negocio.</td></tr>
+        <tr><td>Servicios</td><td><code>service/</code></td><td>La lógica: disponibilidad, reserva, cambios de estado. Es donde vive la verdad.</td></tr>
+        <tr><td>Repositorios</td><td><code>repository/</code></td><td>Acceso a la base de datos con Spring Data JPA.</td></tr>
+        <tr><td>Entidades</td><td><code>domain/</code></td><td>El modelo persistente (turnos, clientes, servicios, etc.).</td></tr>
+        <tr><td>DTO</td><td><code>dto/</code></td><td>Los datos que viajan por la API. No exponen las entidades directamente.</td></tr>
+        <tr><td>Configuración</td><td><code>config/</code></td><td>Seguridad, propiedades, zona horaria.</td></tr>
+        <tr><td>Avisos</td><td><code>notification/</code></td><td>Email al barbero y armado del enlace de WhatsApp.</td></tr>
+        <tr><td>Errores</td><td><code>common/</code></td><td>Traduce excepciones a respuestas uniformes.</td></tr>
+    </table>
+
+    <h3>5.2 Estructura de carpetas</h3>
+<pre>BarberTrend/
+├── docs/                       documentación
+├── .env.example                plantilla de variables (sin secretos)
+└── backend/
+    └── src/
+        ├── main/
+        │   ├── java/com/barbertrend/
+        │   │   ├── common/       manejo de errores
+        │   │   ├── config/       seguridad y propiedades
+        │   │   ├── domain/       entidades
+        │   │   ├── dto/          records de la API
+        │   │   ├── notification/ email y WhatsApp
+        │   │   ├── repository/   acceso a datos
+        │   │   ├── service/      lógica de negocio
+        │   │   └── web/          controladores REST
+        │   └── resources/
+        │       ├── application*.yml     configuración por perfil
+        │       ├── db/migration/        migraciones Flyway
+        │       └── static/              web pública y panel
+        └── test/                        pruebas automatizadas</pre>
+
+    <h3>5.3 Perfiles y base de datos</h3>
+    <table>
+        <tr><th>Perfil</th><th>Base de datos</th><th>Uso</th></tr>
+        <tr><td><code>test</code></td><td>H2 en memoria</td><td>Pruebas: arranca y se tira en cada corrida.</td></tr>
+        <tr><td><code>dev</code></td><td>H2 en archivo</td><td>Desarrollo local sin instalar nada.</td></tr>
+        <tr><td><code>prod</code></td><td>PostgreSQL 18</td><td>Producción.</td></tr>
+    </table>
+    <p>
+        El esquema se crea <strong>sólo</strong> con migraciones de Flyway. La
+        propiedad <code>ddl-auto</code> está en <code>none</code>: Hibernate
+        nunca modifica el esquema por su cuenta.
+    </p>
+
+    <h3>5.4 El frontend vive dentro de Spring Boot</h3>
+    <p>
+        El sitio y el panel son archivos estáticos servidos por la misma
+        aplicación. Esto simplifica el despliegue (un solo servicio) y evita
+        problemas de CORS. Cuando haga falta, se puede separar sin reescribir
+        nada, porque el frontend sólo habla con la API por HTTP.
+    </p>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 6. ESTADO POR ETAPAS                                                  -->
+<!-- ===================================================================== -->
+<section>
+    <h2>6. Estado por etapas</h2>
+
+    <table>
+        <tr><th>Etapa</th><th>Contenido</th><th>Estado</th></tr>
+        <tr><td>1</td><td>Análisis, arquitectura y modelo de datos</td><td><span class="badge b-ok">Listo</span></td></tr>
+        <tr><td>2</td><td>Web pública responsive</td><td><span class="badge b-ok">Listo</span></td></tr>
+        <tr><td>3</td><td>Backend, reservas, panel y seguridad</td><td><span class="badge b-ok">Listo</span></td></tr>
+        <tr><td>4</td><td>Integración con WhatsApp</td><td><span class="badge b-warn">Parcial</span> — envío manual hecho; falta la API oficial</td></tr>
+        <tr><td>5</td><td>Asistente de marketing con IA</td><td><span class="badge b-off">Pendiente</span></td></tr>
+        <tr><td>6</td><td>Automatización, métricas y despliegue</td><td><span class="badge b-off">Pendiente</span></td></tr>
+    </table>
+
+    <h3>Qué funciona hoy, en una tabla</h3>
+    <table>
+        <tr><th>Parte</th><th>Estado</th></tr>
+        <tr><td>Diseño responsive (móvil, tablet, computadora)</td><td><span class="badge b-ok">Listo</span></td></tr>
+        <tr><td>Servicios, galería, horarios y contacto</td><td><span class="badge b-ok">Listo</span>, con datos reales</td></tr>
+        <tr><td>Formulario de reserva</td><td><span class="badge b-ok">Listo</span>: crea reservas reales</td></tr>
+        <tr><td>Backend de reservas</td><td><span class="badge b-ok">Listo</span>, con garantía anti-superposición</td></tr>
+        <tr><td>Login y acceso al panel privado</td><td><span class="badge b-ok">Listo</span> y probado</td></tr>
+        <tr><td>Panel: listar, confirmar, completar y cancelar turnos</td><td><span class="badge b-ok">Listo</span></td></tr>
+        <tr><td>Aviso por email al barbero</td><td><span class="badge b-ok">Listo</span> (dry-run por defecto)</td></tr>
+        <tr><td>WhatsApp al cliente</td><td><span class="badge b-warn">Manual</span> con enlace <code>wa.me</code></td></tr>
+        <tr><td>Asistente de marketing con IA</td><td><span class="badge b-off">Pendiente</span></td></tr>
+    </table>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 7. LO HECHO                                                           -->
+<!-- ===================================================================== -->
+<section>
+    <h2>7. Lo que ya está hecho</h2>
+
+    <h3>7.1 Etapa 1 — Análisis y arquitectura</h3>
+    <ul>
+        <li>Elección y verificación de versiones compatibles.</li>
+        <li>Modelo de datos completo, pensado para el negocio real.</li>
+        <li>Definición de las reglas de agenda y de los estados de un turno.</li>
+        <li>Documentación de decisiones, con motivos y fuentes.</li>
+    </ul>
+
+    <h3>7.2 Etapa 2 — Web pública</h3>
+    <ul>
+        <li>Sitio responsive con portada, servicios, galería, horarios y
+            contacto.</li>
+        <li>Identidad visual definida (paleta oscura con dorado).</li>
+        <li>Logo con fondo transparente, generado desde el JPEG original con
+            una técnica de relleno por inundación para no perforar las partes
+            blancas internas.</li>
+        <li>Cuatro fotos reales de cortes, optimizadas (hasta un 89 % menos de
+            peso).</li>
+        <li>Todos los textos, precios y enlaces centralizados en
+            <code>site-config.js</code>: cambiar la barbería no requiere tocar
+            HTML ni CSS.</li>
+    </ul>
+
+    <h3>7.3 Etapa 3 — Reservas, panel y seguridad</h3>
+
+    <h4>Backend de reservas</h4>
+    <ul>
+        <li>Cálculo de disponibilidad por servicio y fecha, aplicando horario
+            de atención, anticipación mínima, horizonte máximo y turnos ya
+            ocupados.</li>
+        <li>Creación de turnos con validación de datos.</li>
+        <li>Consulta pública del estado por código de referencia.</li>
+        <li>Garantía de no superposición impuesta por la base de datos
+            (ver sección 8).</li>
+        <li>Errores uniformes con códigos claros (<code>SLOT_NOT_AVAILABLE</code>,
+            <code>OUTSIDE_SCHEDULE</code>, <code>TOO_SOON</code>,
+            <code>VALIDATION_ERROR</code>, etc.).</li>
+    </ul>
+
+    <h4>Sitio público conectado</h4>
+    <ul>
+        <li>El formulario consulta la disponibilidad real y crea el turno.</li>
+        <li>Estados de carga, éxito y error bien visibles.</li>
+        <li>Si otro cliente tomó el horario, se muestra un mensaje claro y se
+            recarga la grilla.</li>
+        <li>Al reservar, se muestra el código para consultar el turno.</li>
+    </ul>
+
+    <h4>Panel del barbero</h4>
+    <ul>
+        <li>Acceso privado con login y contraseña (hash BCrypt).</li>
+        <li>Listado de turnos con filtro por estado (pendientes, confirmados,
+            cancelados) y por rango de fechas.</li>
+        <li>Acciones: confirmar, completar, cancelar (con motivo obligatorio) y
+            abrir WhatsApp.</li>
+        <li>Los teléfonos se muestran enmascarados en el listado y completos
+            sólo en el detalle, que es donde hacen falta.</li>
+        <li>Cierre de sesión por POST (no por un enlace que podría dispararse
+            sin querer).</li>
+    </ul>
+
+    <h4>Avisos</h4>
+    <ul>
+        <li><strong>Email automático al barbero</strong> al entrar un turno
+            nuevo.</li>
+        <li><strong>WhatsApp manual al cliente</strong> con el mensaje ya
+            armado, al confirmar.</li>
+        <li>Modo <em>dry-run</em>: sin credenciales, el email se escribe en el
+            log y no se envía nada.</li>
+    </ul>
+
+    <div class="callout">
+        <strong>Un bug real que se encontró y se corrigió.</strong> Las pruebas
+        de concurrencia fallaban: ante reservas simultáneas, varios turnos
+        quedaban con el mismo bloque. La causa era que JPA usaba
+        <code>merge</code> en lugar de <code>insert</code>. Se corrigió
+        implementando <code>Persistable</code> en la entidad del bloque. Hoy las
+        pruebas de concurrencia pasan. El detalle está en la sección 8.3.
+    </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 8. ANTI-SUPERPOSICIÓN                                                 -->
+<!-- ===================================================================== -->
+<section>
+    <h2>8. La garantía anti-superposición de turnos</h2>
+
+    <p>
+        Esta es la parte más importante del sistema y la que justifica varias
+        decisiones de diseño. Como es un negocio real, dos personas reservando
+        el mismo horario a la vez es exactamente lo que va a pasar.
+    </p>
+
+    <h3>8.1 El problema del enfoque obvio</h3>
+    <p>
+        El código "pregunto si está libre y, si está, lo grabo" tiene una
+        <strong>condición de carrera</strong>: entre la consulta y el guardado
+        entra la otra petición, que también ve el horario libre, y las dos
+        graban.
+    </p>
+
+    <h3>8.2 La solución: bloques ocupados</h3>
+    <p>
+        La jornada se divide en bloques de 30 minutos. Una reserva no ocupa un
+        instante: <strong>ocupa bloques</strong>. Un corte de 60 minutos a las
+        10:00 inserta dos filas: <code>(barbero, 10:00)</code> y
+        <code>(barbero, 10:30)</code>.
+    </p>
+    <p>
+        La tabla <code>appointment_slot</code> tiene clave primaria compuesta
+        <code>(barber_id, slot_start)</code>. Cuando alguien intenta tomar un
+        bloque ya ocupado, el <code>INSERT</code> viola esa clave y la base de
+        datos rechaza la operación. La aplicación traduce ese rechazo a
+        <code>409 Conflict</code>.
+    </p>
+    <p>
+        Por qué no alcanza con un <code>UNIQUE(barber_id, starts_at)</code>: dos
+        turnos pueden empezar en instantes distintos y pisarse igual.
+    </p>
+<pre>10:00 → 11:00   y   10:30 → 11:30
+Los dos starts_at son distintos, pero las dos personas quedan en la misma silla.</pre>
+    <p>
+        Ocupar bloques hace que el conflicto se vea <em>siempre</em>, sin
+        importar cómo se combinen las duraciones.
+    </p>
+
+    <h3>8.3 El bug que apareció en las pruebas</h3>
+    <p>
+        La primera versión usaba <code>saveAndFlush(...)</code>. Las pruebas de
+        concurrencia fallaban: en lugar de una sola reserva exitosa, quedaban
+        muchas. La causa:
+    </p>
+    <ul>
+        <li>Con una <strong>clave compuesta asignada a mano</strong>, Spring Data
+            no ve la entidad como "nueva" (la clave no es nula), así que usa
+            <code>merge</code>.</li>
+        <li>El <code>merge</code> primero consulta; si otro hilo ya insertó el
+            bloque, <strong>actualiza la fila existente</strong> en lugar de
+            fallar.</li>
+        <li>Resultado: el que perdía la carrera se quedaba con el bloque del
+            ganador.</li>
+    </ul>
+    <p>
+        La corrección fue implementar <code>Persistable</code> y marcar la
+        entidad como nueva. Así Spring Data usa <code>persist</code> y el
+        <code>INSERT</code> choca con la clave primaria. Las pruebas de
+        concurrencia (20 peticiones simultáneas al mismo horario) pasan.
+    </p>
+
+    <h3>8.4 Estados de un turno</h3>
+<pre>                    ┌──────────────┐
+   reserva ───────► │   PENDING    │  (el barbero debe confirmar)
+                    └──┬────────┬──┘
+          confirmar    │        │  cancelar
+                       ▼        ▼
+                ┌────────────┐  ┌───────────┐
+                │ CONFIRMED  │  │ CANCELLED │
+                └─────┬──────┘  └───────────┘
+                      │  completar
+                      ▼
+                ┌────────────┐
+                │ COMPLETED  │
+                └────────────┘</pre>
+
+    <table>
+        <tr><th>Estado</th><th>Significado</th><th>¿Ocupa el horario?</th></tr>
+        <tr><td><code>PENDING</code></td><td>Reserva recibida, esperando confirmación</td><td>Sí</td></tr>
+        <tr><td><code>CONFIRMED</code></td><td>Confirmada por el barbero</td><td>Sí</td></tr>
+        <tr><td><code>COMPLETED</code></td><td>El servicio se prestó</td><td>Ya no</td></tr>
+        <tr><td><code>CANCELLED</code></td><td>Cancelada, con motivo</td><td>No (libera el horario)</td></tr>
+    </table>
+
+    <div class="callout">
+        Un turno <code>PENDING</code> <strong>sí bloquea el horario</strong>. Si
+        dos personas piden las 10:00, la segunda recibe <code>409</code> aunque
+        la primera todavía no se haya confirmado. Sin esa protección, ambos
+        turnos entrarían a la lista de pendientes.
+    </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 9. SEGURIDAD                                                          -->
+<!-- ===================================================================== -->
+<section>
+    <h2>9. Seguridad</h2>
+
+    <table>
+        <tr><th>Medida</th><th>Implementación</th></tr>
+        <tr><td>Credenciales fuera del código</td><td>Variables de entorno en <code>.env</code> (ignorado por Git). <code>.env.example</code> sólo tiene valores de ejemplo.</td></tr>
+        <tr><td>Contraseña del panel</td><td>Hash BCrypt. Nunca texto plano (salvo modo desarrollo explícito, que avisa por log).</td></tr>
+        <tr><td>Rutas privadas</td><td><code>/admin/**</code> exige sesión; <code>/api/admin/**</code> responde <code>401</code> sin sesión.</td></tr>
+        <tr><td>Sesión</td><td>Cookie <code>HttpOnly</code>; se cierra con <code>POST /admin/logout</code>.</td></tr>
+        <tr><td>CSRF</td><td>Activado. El token viaja en la cookie <code>XSRF-TOKEN</code> y en el campo <code>_csrf</code>. La API pública queda exceptuada.</td></tr>
+        <tr><td>Datos personales</td><td>Sólo se guarda lo indispensable (nombre y teléfono). Los teléfonos se enmascaran en los logs y en los listados.</td></tr>
+        <tr><td>Validación</td><td>En el servidor, no sólo en JavaScript.</td></tr>
+        <tr><td>Errores</td><td>Respuestas uniformes; nunca se exponen detalles internos ni trazas al navegador.</td></tr>
+    </table>
+
+    <div class="callout">
+        <strong>Nota sobre la contraseña.</strong> Si en algún momento se sube un
+        <code>.env</code> por error, no alcanza con borrarlo: hay que
+        <em>rotar</em> las credenciales, porque siguen en el historial de Git.
+    </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 10. API                                                               -->
+<!-- ===================================================================== -->
+<section class="section">
+    <h2>10. API REST</h2>
+
+    <p>
+        Todas las rutas responden y consumen JSON, salvo las páginas HTML del
+        panel. Los errores tienen siempre la misma estructura:
+    </p>
+<pre>{
+  "code": "SLOT_NOT_AVAILABLE",
+  "message": "Ese horario acaba de ser reservado. Elegí otro.",
+  "field": null,
+  "timestamp": "2026-10-23T22:30:00"
+}</pre>
+
+    <h3>10.1 Endpoints públicos</h3>
+    <table>
+        <tr><th>Método</th><th>Ruta</th><th>Qué hace</th></tr>
+        <tr><td>GET</td><td><code>/api/public/services</code></td><td>Servicios activos, ordenados.</td></tr>
+        <tr><td>GET</td><td><code>/api/public/availability</code></td><td>Horarios libres para un servicio y una fecha.</td></tr>
+        <tr><td>POST</td><td><code>/api/public/appointments</code></td><td>Crea una reserva (nace <code>PENDING</code>).</td></tr>
+        <tr><td>GET</td><td><code>/api/public/appointments/{reference}</code></td><td>Consulta el estado de un turno por su código, sin sesión.</td></tr>
+    </table>
+
+    <h4>Ejemplo: crear una reserva</h4>
+<pre>POST /api/public/appointments
+{
+  "serviceId": 1,
+  "startsAt": "2026-10-24T10:00:00",
+  "customerName": "Juan Pérez",
+  "phone": "5491122334455",
+  "notes": "corto los lados"
+}
+
+201 Created
+{
+  "reference": "BT-7K2M9Q",
+  "status": "PENDING",
+  "serviceName": "Corte clásico",
+  "startsAt": "2026-10-24T10:00:00",
+  "endsAt": "2026-10-24T10:30:00",
+  "message": "Recibimos tu pedido. Te confirmamos el turno a la brevedad."
+}</pre>
+
+    <h3>10.2 Endpoints del panel</h3>
+    <p>Requieren sesión. Sin sesión, la API devuelve <code>401</code>.</p>
+    <table>
+        <tr><th>Método</th><th>Ruta</th><th>Qué hace</th></tr>
+        <tr><td>GET</td><td><code>/api/admin/appointments?from=&amp;to=&amp;status=</code></td><td>Listado (por defecto: hoy + 7 días), filtrable por estado.</td></tr>
+        <tr><td>GET</td><td><code>/api/admin/appointments/{id}</code></td><td>Detalle con teléfono completo y enlace de WhatsApp.</td></tr>
+        <tr><td>PATCH</td><td><code>/api/admin/appointments/{id}/confirm</code></td><td>Pasa de <code>PENDING</code> a <code>CONFIRMED</code>.</td></tr>
+        <tr><td>PATCH</td><td><code>/api/admin/appointments/{id}/complete</code></td><td>Pasa a <code>COMPLETED</code> y libera el horario.</td></tr>
+        <tr><td>POST</td><td><code>/api/admin/appointments/{id}/cancel</code></td><td>Cancela con motivo y libera el horario.</td></tr>
+        <tr><td>GET / POST / PUT</td><td><code>/api/admin/services</code></td><td>Gestión del catálogo (incluye inactivos).</td></tr>
+        <tr><td>PATCH</td><td><code>/api/admin/services/{id}/active</code></td><td>Activar o desactivar un servicio.</td></tr>
+        <tr><td>GET / PUT</td><td><code>/api/admin/business-hours</code></td><td>Horario semanal de atención.</td></tr>
+    </table>
+
+    <h4>Detalle de un turno (extracto)</h4>
+<pre>{
+  "id": 42,
+  "reference": "BT-7K2M9Q",
+  "status": "CONFIRMED",
+  "customerPhone": "2284239845",
+  "clientWhatsAppUrl": "https://wa.me/5492284239845?text=Hola%20Juan..."
+}</pre>
+    <p>
+        En el listado el teléfono va enmascarado; en el detalle va completo,
+        porque es la pantalla donde el barbero lo necesita para avisarle al
+        cliente.
+    </p>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 11. MODELO DE DATOS                                                   -->
+<!-- ===================================================================== -->
+<section>
+    <h2>11. Modelo de datos</h2>
+
+    <p>Tablas principales:</p>
+    <table>
+        <tr><th>Tabla</th><th>Para qué</th></tr>
+        <tr><td><code>service</code></td><td>Catálogo: nombre, descripción, precio, duración real, activo, orden.</td></tr>
+        <tr><td><code>barber</code></td><td>Barberos. Hoy hay uno, pero la tabla existe para no migrar datos después.</td></tr>
+        <tr><td><code>business_hours</code></td><td>Horario semanal: 7 filas, una por día. Los cerrados conservan su fila.</td></tr>
+        <tr><td><code>customer</code></td><td>Clientes: nombre y teléfono normalizado a dígitos. Sin datos de más.</td></tr>
+        <tr><td><code>appointment</code></td><td>Turnos: referencia pública, cliente, barbero, servicio, inicio, fin, estado, notas, motivo de cancelación.</td></tr>
+        <tr><td><code>appointment_slot</code></td><td>Bloques ocupados. Es la garantía de no superposición.</td></tr>
+        <tr><td><code>time_off</code></td><td>Bloqueos de agenda (vacaciones, feriados, almuerzos).</td></tr>
+    </table>
+
+    <h3>El código de referencia</h3>
+    <p>
+        Cada turno recibe un código corto y aleatorio (<code>BT-7K2M9Q</code>).
+        Sirve para que el cliente consulte su turno sin iniciar sesión y sin ver
+        los datos de otros. <strong>No</strong> es secuencial, porque eso
+        permitiría adivinarlos.
+    </p>
+
+    <h3>Tablas previstas (aún no creadas)</h3>
+    <table>
+        <tr><th>Tabla</th><th>Etapa</th><th>Para qué</th></tr>
+        <tr><td><code>marketing_source</code></td><td>5</td><td>Fuentes de tendencias consultadas y su estado.</td></tr>
+        <tr><td><code>marketing_idea</code></td><td>5</td><td>Ideas generadas, con su origen verificable.</td></tr>
+        <tr><td><code>marketing_delivery</code></td><td>5</td><td>Envíos de recomendaciones y su resultado.</td></tr>
+        <tr><td><code>post_result</code></td><td>5+</td><td>Resultados de publicaciones, para relacionarlos con reservas.</td></tr>
+    </table>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 12. PRUEBAS                                                           -->
+<!-- ===================================================================== -->
+<section>
+    <h2>12. Pruebas automatizadas</h2>
+
+    <p>
+        La suite se ejecuta con <code>./mvnw test</code>. Estado actual:
+        <strong>40 de 40 en verde</strong>.
+    </p>
+
+    <table>
+        <tr><th>Clase de prueba</th><th>Cantidad</th><th>Qué cubre</th></tr>
+        <tr><td><code>ScheduleRulesTest</code> (Límites y Redondeo)</td><td>9</td><td>Reglas de la grilla: horarios, duración y redondeo a bloques.</td></tr>
+        <tr><td><code>ConcurrentBookingTest</code></td><td>2</td><td>20 reservas simultáneas al mismo horario: gana exactamente una.</td></tr>
+        <tr><td><code>BookingFlowApiTest</code></td><td>3</td><td>Circuito completo: disponibilidad, alta, rechazo del duplicado, confirmación y WhatsApp.</td></tr>
+        <tr><td><code>AdminBlockApiTest</code></td><td>9</td><td>Cierres completos y parciales, superposición, turnos existentes, reserva directa bloqueada y permisos.</td></tr>
+        <tr><td><code>LoginSecurityTest</code></td><td>8</td><td>Acceso al panel, CSRF, redirecciones y cierre de sesión.</td></tr>
+        <tr><td><code>WhatsAppLinkBuilderTest</code></td><td>6</td><td>Normalización del teléfono argentino al formato internacional.</td></tr>
+        <tr><td><code>EmailAppointmentNotifierTest</code></td><td>3</td><td>Modo dry-run y contenido del email de aviso.</td></tr>
+    </table>
+
+    <div class="callout">
+        <strong>Lo que se probó manualmente además de la suite:</strong> se
+        levantó la aplicación, se reservó un turno desde la API pública, se
+        verificó el rechazo del horario duplicado (<code>409</code>), se inició
+        sesión en el panel, se confirmó y se canceló un turno, y se comprobó
+        que el enlace de WhatsApp se genera con el número normalizado y los
+        acentos correctos. También se abrió el panel en Chrome headless y se
+        verificó que renderiza la sección <strong>Cierres y bloqueos</strong> y
+        que carga la lista de cierres desde la API.
+    </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 13. CÓMO EJECUTAR                                                     -->
+<!-- ===================================================================== -->
+<section>
+    <h2>13. Cómo ejecutar y probar</h2>
+
+    <h3>Requisitos</h3>
+    <ul>
+        <li>JDK 21 (por ejemplo, Adoptium Temurin).</li>
+        <li>Maven 3.9 o superior; o usar el wrapper <code>mvnw</code>, que lo
+            descarga solo.</li>
+    </ul>
+
+    <h3>Pasos</h3>
+<pre># 1) Copiar la plantilla de variables dentro de backend
+cp .env.example backend/.env
+
+# 2) Arrancar
+cd backend
+./mvnw spring-boot:run        # en Windows: mvnw.cmd spring-boot:run</pre>
+
+    <table>
+        <tr><th>Dirección</th><th>Qué hay</th></tr>
+        <tr><td><code>http://localhost:8080</code></td><td>Sitio público</td></tr>
+        <tr><td><code>http://localhost:8080/admin/login</code></td><td>Ingreso al panel del barbero</td></tr>
+        <tr><td><code>http://localhost:8080/admin</code></td><td>Panel (pide sesión)</td></tr>
+    </table>
+
+    <p>
+        Con el perfil <code>dev</code> no hace falta instalar una base de datos:
+        usa H2 en archivo.
+    </p>
+
+    <h3>Ejecutar las pruebas</h3>
+<pre>cd backend
+./mvnw test</pre>
+
+    <h3>Probar el aviso por email sin enviar nada</h3>
+    <p>
+        Con <code>MAIL_ENABLED=false</code> (el valor por defecto), al reservar
+        aparece en el log una línea como esta:
+    </p>
+<pre>[MAIL dry-run] Turno BT-KSXMMH para 22******45 el 24/10/2026 10:00 hs
+— servicio Corte clásico. Aviso a — (activá MAIL_ENABLED=true para enviarlo).</pre>
+    <p>
+        El teléfono aparece enmascarado: los datos personales no se escriben
+        completos en el log.
+    </p>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 14. CONFIGURACIÓN                                                     -->
+<!-- ===================================================================== -->
+<section>
+    <h2>14. Configuración (variables de entorno)</h2>
+
+    <p>
+        Todo lo configurable vive en <code>backend/.env</code>, que está
+        ignorado por Git. La plantilla <code>.env.example</code> tiene los
+        mismos nombres con valores de ejemplo.
+    </p>
+
+    <h3>Panel del barbero</h3>
+    <table>
+        <tr><th>Variable</th><th>Para qué</th></tr>
+        <tr><td><code>ADMIN_USERNAME</code></td><td>Usuario del panel.</td></tr>
+        <tr><td><code>ADMIN_PASSWORD_HASH</code></td><td>Contraseña como hash BCrypt (recomendado).</td></tr>
+        <tr><td><code>ADMIN_PASSWORD</code></td><td>Alternativa en texto plano, sólo desarrollo (avisa por log).</td></tr>
+    </table>
+
+    <h3>Agenda</h3>
+    <table>
+        <tr><th>Variable</th><th>Valor por defecto</th></tr>
+        <tr><td><code>APP_TIMEZONE</code></td><td>America/Argentina/Buenos_Aires</td></tr>
+        <tr><td><code>APP_SLOT_MINUTES</code></td><td>30</td></tr>
+        <tr><td><code>APP_MIN_LEAD_MINUTES</code></td><td>120 (anticipación mínima)</td></tr>
+        <tr><td><code>APP_MAX_ADVANCE_DAYS</code></td><td>60 (horizonte máximo)</td></tr>
+        <tr><td><code>APP_PUBLIC_BASE_URL</code></td><td>http://localhost:8080</td></tr>
+    </table>
+
+    <h3>Avisos por email</h3>
+    <table>
+        <tr><th>Variable</th><th>Para qué</th></tr>
+        <tr><td><code>MAIL_ENABLED</code></td><td><code>false</code> = dry-run (no envía). <code>true</code> = envía de verdad.</td></tr>
+        <tr><td><code>MAIL_HOST</code> / <code>MAIL_PORT</code></td><td>Servidor SMTP (Gmail: <code>smtp.gmail.com</code> / <code>587</code>).</td></tr>
+        <tr><td><code>MAIL_AUTH</code> / <code>MAIL_STARTTLS</code></td><td>Autenticación y cifrado (Gmail: <code>true</code> / <code>true</code>).</td></tr>
+        <tr><td><code>MAIL_USERNAME</code></td><td>Cuenta desde la que se envía.</td></tr>
+        <tr><td><code>MAIL_PASSWORD</code></td><td>Contraseña de aplicación (16 caracteres), no la normal.</td></tr>
+        <tr><td><code>MAIL_FROM</code></td><td>Remitente. Si queda vacío, se usa <code>MAIL_USERNAME</code>.</td></tr>
+        <tr><td><code>BARBER_EMAIL</code></td><td>Casilla del barbero que recibe el aviso.</td></tr>
+        <tr><td><code>BARBER_WHATSAPP</code></td><td>WhatsApp del barbero (guardado para la etapa automática).</td></tr>
+    </table>
+
+    <div class="callout">
+        <strong>Activar el envío real de emails (gratis con Gmail).</strong>
+        <ol style="margin:6pt 0 0 0;">
+            <li>Activá la verificación en dos pasos de tu cuenta de Google.</li>
+            <li>Creá una <em>contraseña de aplicación</em> (Cuenta de Google →
+                Seguridad).</li>
+            <li>Completá en <code>backend/.env</code>: <code>MAIL_ENABLED=true</code>,
+                <code>MAIL_USERNAME</code>, <code>MAIL_PASSWORD</code>, <code>MAIL_FROM</code> y
+                <code>BARBER_EMAIL</code>.</li>
+            <li>Reiniciá la aplicación.</li>
+        </ol>
+    </div>
+
+    <div class="callout">
+        <strong>Ojo con los acentos en el <code>.env</code>.</strong> El archivo
+        se lee como ISO-8859-1, así que los acentos se rompen. El nombre
+        comercial y la dirección se configuran en <code>application.yml</code>
+        (que sí es UTF-8). Si hiciera falta ponerlos en el <code>.env</code>,
+        hay que escaparlos (por ejemplo, <code>\u00ED</code> para la í).
+    </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 15. HOJA DE RUTA                                                      -->
+<!-- ===================================================================== -->
+<section class="section">
+    <h2>15. Hoja de ruta: lo que viene</h2>
+
+    <p>
+        El orden previsto prioriza tener algo útil y confiable antes que sumar
+        tecnología. Las etapas marcadas como hechas ya están verificadas; el
+        resto es planificación.
+    </p>
+
+    <h3>Etapa 4 — Integración con WhatsApp <span class="badge b-warn">Parcial</span></h3>
+    <p><em>Hecho:</em> envío manual con enlace <code>wa.me</code> y mensaje prearmado.</p>
+    <p><em>Falta:</em></p>
+    <ul>
+        <li>Evaluar la API oficial de WhatsApp Business (requiere cuenta de
+            Meta, número dedicado y plantillas aprobadas; puede tener costo).</li>
+        <li>Implementar un servicio de notificaciones desacoplado del proveedor.</li>
+        <li>Reintentos y control de duplicados.</li>
+        <li>Recordatorios automáticos, si aportan valor.</li>
+        <li>Responder/cancelar turnos por WhatsApp.</li>
+    </ul>
+
+    <h3>Etapa 5 — Asistente de marketing con IA <span class="badge b-off">Pendiente</span></h3>
+    <ul>
+        <li>Definir el perfil de la barbería y los estilos de corte.</li>
+        <li>Diseñar una interfaz de IA intercambiable entre proveedores.</li>
+        <li>Generar ideas, guiones para Reels, captions y llamadas a reservar.</li>
+        <li>Guardar las ideas y evitar sugerencias repetidas.</li>
+        <li>Distinguir explícitamente datos verificados, estimaciones y
+            sugerencias creativas.</li>
+    </ul>
+
+    <h3>Etapa 6 — Fuentes de tendencias <span class="badge b-off">Pendiente</span></h3>
+    <div class="callout">
+        <strong>Hallazgo importante.</strong> La API oficial de Instagram
+        <em>no</em> ofrece búsqueda de hashtags ni de tendencias: sólo da
+        insights de las publicaciones propias, publicación de contenido,
+        moderación de comentarios, menciones y mensajería. Por lo tanto, el
+        asistente no puede sacar tendencias de Instagram por API oficial. Habrá
+        que usar fuentes reales y verificables (por ejemplo, YouTube Data API,
+        que permite búsqueda con cupos, o feeds RSS del rubro), documentando
+        fuente por fuente permisos, límites y costos <em>antes</em> de escribir
+        código.
+    </div>
+
+    <h3>Etapa 7 — Automatización <span class="badge b-off">Pendiente</span></h3>
+    <ul>
+        <li>Búsquedas programadas en la zona horaria de Argentina.</li>
+        <li>Generación automática de recomendaciones y resumen por WhatsApp.</li>
+        <li>Evitar ejecuciones simultáneas; reintentos controlados.</li>
+        <li>Registros de actividad y opción de pausar.</li>
+    </ul>
+
+    <h3>Etapa 8 — Seguimiento y métricas <span class="badge b-off">Pendiente</span></h3>
+    <ul>
+        <li>Registrar qué ideas se usaron y cuándo se publicaron.</li>
+        <li>Cargar métricas manualmente y relacionarlas con turnos.</li>
+        <li>Comparar formatos y orientar las próximas recomendaciones.</li>
+    </ul>
+    <p>
+        No se afirmará que una publicación generó una reserva si no hay una
+        forma razonable de relacionarlas.
+    </p>
+
+    <h3>Etapa 9 — Despliegue <span class="badge b-off">Pendiente</span></h3>
+    <ul>
+        <li>Comparar proveedores de alojamiento y estimar costos mensuales.</li>
+        <li>Configurar variables de entorno y base de datos persistentes.</li>
+        <li>Publicar la web con HTTPS.</li>
+        <li>Probar reservas reales controladas y verificar persistencia.</li>
+        <li>Documentar mantenimiento y recuperación ante errores.</li>
+    </ul>
+
+    <div class="callout">
+        <strong>Mejoras cercanas al sistema de reservas</strong> (antes o junto
+        con la Etapa 4): extender un turno desde el panel cuando un corte se
+        pasa de hora, y avisar de los horarios que quedaron apretados al día
+        siguiente.
+    </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 16. DEUDA TÉCNICA                                                     -->
+<!-- ===================================================================== -->
+<section>
+    <h2>16. Deuda técnica y límites conocidos</h2>
+
+    <p>
+        Deuda asumida de forma consciente, con su motivo y cuándo se resolvería.
+    </p>
+
+    <table>
+        <tr><th>Deuda / límite</th><th>Motivo</th><th>Se resuelve</th></tr>
+        <tr>
+            <td>Un solo usuario administrador (en memoria)</td>
+            <td>Una barbería tiene un dueño</td>
+            <td>Si aparece un segundo usuario</td>
+        </tr>
+        <tr>
+            <td>Sin selector de barbero en el frontend</td>
+            <td>Hoy hay un solo barbero</td>
+            <td>Cuando haya más de uno</td>
+        </tr>
+        <tr>
+            <td>Sin <em>rate limiting</em> en el formulario público ni en el login</td>
+            <td>Uso interno y volumen bajo</td>
+            <td>Antes de exponer a internet</td>
+        </tr>
+        <tr>
+            <td>Sin paginación</td>
+            <td>Volumen esperado bajo</td>
+            <td>Cuando el listado crezca</td>
+        </tr>
+        <tr>
+            <td>Sin caché</td>
+            <td>Volumen esperado bajo</td>
+            <td>Si se detecta latencia</td>
+        </tr>
+        <tr>
+            <td>Aviso por email síncrono (después del commit)</td>
+            <td>Simplicidad; el volumen es bajo</td>
+            <td>Con una cola/outbox, si hace falta garantizar el envío</td>
+        </tr>
+        <tr>
+            <td>El número del barbero no se usa aún para enviar</td>
+            <td>El aviso automático hoy es el email</td>
+            <td>En la etapa de WhatsApp automático</td>
+        </tr>
+        <tr>
+            <td>Servicios y horarios se editan sólo desde la API/base, no desde el panel</td>
+            <td>El panel de gestión llega después</td>
+            <td>Próximos pasos del panel</td>
+        </tr>
+    </table>
+
+    <p class="lead" style="margin-top:12pt;">
+        La prioridad es entregar un producto útil y confiable, evitando
+        complejidad innecesaria.
+    </p>
+</section>
+
+<!-- ===================================================================== -->
+<!-- 17. DATOS PENDIENTES                                                  -->
+<!-- ===================================================================== -->
+<section>
+    <h2>17. Datos del negocio pendientes</h2>
+
+    <p>
+        El proyecto no inventa datos reales de la barbería. Cuando falta algo,
+        el sitio lo oculta o muestra un valor marcado como ejemplo. Estado
+        actual:
+    </p>
+
+    <table>
+        <tr><th>Dato</th><th>Estado</th></tr>
+        <tr><td>Nombre, logo, colores, Instagram</td><td><span class="badge b-ok">Real</span></td></tr>
+        <tr><td>WhatsApp y teléfonos</td><td><span class="badge b-ok">Real</span></td></tr>
+        <tr><td>Dirección (Bolívar 3008)</td><td><span class="badge b-ok">Real</span>, guardada</td></tr>
+        <tr><td>Horario de atención</td><td><span class="badge b-ok">Real</span></td></tr>
+        <tr><td>Catálogo de servicios y precios</td><td><span class="badge b-ok">Real</span></td></tr>
+        <tr><td>Fotos de la galería</td><td><span class="badge b-ok">Reales</span> (4)</td></tr>
+        <tr><td>Nombre del barbero</td><td><span class="badge b-off">Pendiente</span></td></tr>
+        <tr><td>Email de contacto público</td><td><span class="badge b-off">Pendiente</span></td></tr>
+        <tr><td>Política de cancelación</td><td><span class="badge b-off">Pendiente</span></td></tr>
+        <tr><td>Textos de portada y eslogan</td><td><span class="badge b-warn">De ejemplo</span></td></tr>
+        <tr><td>Dominio y alojamiento</td><td><span class="badge b-off">Pendiente</span> (Etapa 9)</td></tr>
+        <tr><td>Credenciales y plantilla de Meta (WhatsApp)</td><td><span class="badge b-off">Pendiente</span> (Etapa 4)</td></tr>
+        <tr><td>Proveedor de IA y credenciales</td><td><span class="badge b-off">Pendiente</span> (Etapa 5)</td></tr>
+    </table>
+
+    <div class="callout">
+        <strong>Compromiso.</strong> Mientras un dato esté pendiente, no se
+        escriben precios, direcciones, horarios ni métricas inventadas como si
+        fueran reales. Cuando el dueño aporte el dato, se carga en el archivo o
+        la migración que corresponda y se indica exactamente qué se tocó.
+    </div>
+</section>
+
+<!-- ===================================================================== -->
+<!-- CIERRE                                                                -->
+<!-- ===================================================================== -->
+<section>
+    <h2>Cierre</h2>
+    <p>
+        BarberTrend AI tiene hoy un sistema de reservas completo y en uso: el
+        cliente reserva, el barbero administra su agenda desde el teléfono y
+        recibe un aviso automático por cada turno nuevo. Todo esto funciona sin
+        costo operativo.
+    </p>
+    <p>
+        Lo que sigue apunta a reducir trabajo manual (automatizar el WhatsApp y
+        los recordatorios), a llevar el sistema a internet de forma segura y,
+        en paralelo o después, a sumar el asistente de marketing con IA sobre
+        fuentes de datos verificables.
+    </p>
+    <p style="margin-top:16pt; color:#5f5a52; font-size:9pt;">
+        Documento generado el 23 de octubre de 2026. Fuente editable:
+        <code>docs/documentacion.html</code>. Para regenerar el PDF:
+        <code>google-chrome --headless --print-to-pdf=Documentacion-BarberTrend.pdf docs/documentacion.html</code>.
+    </p>
+</section>
+
+</body>
+</html>

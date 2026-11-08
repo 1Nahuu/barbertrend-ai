@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Panel del barbero — Doble S Barbería</title>
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#141414">
+
+    <link rel="icon" type="image/png" sizes="any"
+          href="/assets/img/logo-doble-s.png">
+
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="stylesheet" href="/assets/css/admin.css">
+</head>
+<body class="admin-body">
+
+<div class="panel-shell">
+
+    <header class="panel-header">
+        <div class="container panel-header-inner">
+
+            <a class="panel-brand" href="/admin" aria-label="Panel del barbero">
+                <img src="/assets/img/logo-doble-s.png"
+                     alt=""
+                     width="315" height="320"
+                     decoding="async">
+
+                <span class="panel-brand-text">
+                    <span class="panel-brand-name">Doble S Barbería</span>
+                    <span class="panel-brand-sub">Panel del barbero</span>
+                </span>
+            </a>
+
+            <!-- Solo POST cierra la sesión (ver SecurityConfig). -->
+            <form class="logout-form" id="logout-form" method="post" action="/admin/logout">
+                <input type="hidden" name="_csrf" id="logout-csrf" value="">
+                <button class="btn btn-outline btn-sm" type="submit">Salir</button>
+            </form>
+
+        </div>
+    </header>
+
+    <main class="container panel-main">
+
+        <h1 class="panel-title">Panel del barbero</h1>
+        <p class="panel-intro">
+            Esta pantalla es privada: solo se ve con la sesión iniciada.
+        </p>
+
+        <section class="panel-card panel-appointments" aria-labelledby="appointments-title">
+            <div class="panel-card-head">
+                <div>
+                    <h2 class="panel-card-title" id="appointments-title">Turnos</h2>
+                    <p class="panel-card-text">
+                        Confirmá los turnos y avisale al cliente por WhatsApp.
+                    </p>
+                </div>
+
+                <button class="btn btn-outline btn-sm" type="button"
+                        id="refresh-appointments">
+                    Actualizar
+                </button>
+            </div>
+
+            <div class="appointments-toolbar">
+                <label class="label" for="status-filter">Mostrar</label>
+                <select class="input input-sm" id="status-filter">
+                    <option value="PENDING" selected>Pendientes</option>
+                    <option value="">Próximos 7 días (todos)</option>
+                    <option value="CONFIRMED">Confirmados</option>
+                    <option value="CANCELLED">Cancelados</option>
+                </select>
+            </div>
+
+            <!-- Los lectores de pantalla anuncian acá cada carga o error. -->
+            <div id="appointments-status" class="form-status"
+                 role="status" aria-live="polite"></div>
+
+            <div id="appointments-list" class="appointments-list"></div>
+        </section>
+
+        <section class="panel-card panel-blocks" aria-labelledby="blocks-title">
+            <div class="panel-card-head">
+                <div>
+                    <h2 class="panel-card-title" id="blocks-title">
+                        Cierres y bloqueos
+                    </h2>
+                    <p class="panel-card-text">
+                        Cerrá un día completo o solo algunas horas. Si hay
+                        turnos en ese horario, primero tenés que cancelarlos.
+                    </p>
+                </div>
+            </div>
+
+            <form class="block-form" id="block-form" novalidate>
+                <div class="block-form-row">
+                    <div class="field">
+                        <label class="label" for="block-start-date">Desde</label>
+                        <input class="input" type="date" id="block-start-date"
+                               required>
+                    </div>
+
+                    <div class="field" id="block-end-date-field" hidden>
+                        <label class="label" for="block-end-date">
+                            Hasta <span class="label-optional">(opcional)</span>
+                        </label>
+                        <input class="input" type="date" id="block-end-date">
+                    </div>
+                </div>
+
+                <div class="field checkbox-field">
+                    <label class="checkbox-label" for="block-all-day">
+                        <input type="checkbox" id="block-all-day" checked>
+                        Todo el día
+                    </label>
+                </div>
+
+                <div class="block-form-row" id="block-times" hidden>
+                    <div class="field">
+                        <label class="label" for="block-start-time">
+                            Desde hora
+                        </label>
+                        <input class="input" type="time" id="block-start-time"
+                               step="1800">
+                    </div>
+
+                    <div class="field">
+                        <label class="label" for="block-end-time">
+                            Hasta hora
+                        </label>
+                        <input class="input" type="time" id="block-end-time"
+                               step="1800">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label" for="block-reason">
+                        Motivo <span class="label-optional">(opcional)</span>
+                    </label>
+                    <input class="input" type="text" id="block-reason"
+                           maxlength="200"
+                           placeholder="Ej: feriado, vacaciones, almuerzo">
+                </div>
+
+                <p class="field-error" id="block-error" role="alert"></p>
+
+                <div class="block-form-actions">
+                    <button class="btn btn-primary" type="submit"
+                            id="block-submit">
+                        Cerrar agenda
+                    </button>
+                </div>
+            </form>
+
+            <div id="blocks-status" class="form-status"
+                 role="status" aria-live="polite"></div>
+
+            <div id="blocks-list" class="blocks-list"></div>
+        </section>
+
+    </main>
+
+    <footer class="panel-footer">
+        <div class="container">
+            <a href="/">Ir al sitio público</a>
+        </div>
+    </footer>
+
+</div>
+
+<dialog class="panel-dialog" id="cancel-dialog" aria-labelledby="cancel-dialog-title">
+    <form id="cancel-form" method="dialog">
+        <h2 class="panel-dialog-title" id="cancel-dialog-title">Cancelar turno</h2>
+        <p class="panel-dialog-text" id="cancel-dialog-summary"></p>
+
+        <label class="label" for="cancel-reason">Motivo de la cancelación</label>
+        <textarea class="input" id="cancel-reason" rows="3" maxlength="200"
+                  required aria-describedby="cancel-reason-error"></textarea>
+        <p class="field-error" id="cancel-reason-error" role="alert"></p>
+
+        <div class="panel-dialog-actions">
+            <button class="btn btn-outline" type="button" id="cancel-dialog-close">
+                Volver
+            </button>
+            <button class="btn btn-primary" type="submit" id="cancel-dialog-confirm">
+                Cancelar turno
+            </button>
+        </div>
+    </form>
+</dialog>
+
+<script src="/assets/js/admin-panel.js"></script>
+
+</body>
+</html>
