@@ -163,9 +163,8 @@ window.SITE_CONFIG = {
   //     "nominalmente" dura 30, el sistema reserva 1 bloque de 30.
   //
   //     Ojo con esto: si el pelo exige 50 minutos y el turno era de 30,
-  //     el barbero se va a pasar de hora. Por eso en la Etapa 3 el dueño
-  //     va a poder extender un turno desde el panel cuando lo necesite,
-  //     y el sistema avisará de los horarios que quedaron apretados.
+  //     el barbero se va a pasar de hora. La agenda no extiende el turno
+  //     automáticamente; esa situación se maneja en el local.
   //
   // Para marcar un servicio como "Más pedido": agregale
   //   popular: true

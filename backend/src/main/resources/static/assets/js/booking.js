@@ -657,6 +657,12 @@
                     state.time = null;
                     renderSlots();
                     updateSummary();
+                } else if (error.code === 'RATE_LIMIT_EXCEEDED') {
+                    showStatus(
+                        'error',
+                        'Demasiados intentos',
+                        error.message
+                    );
                 } else {
                     showStatus(
                         'error',

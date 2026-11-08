@@ -112,10 +112,10 @@ cd backend
 ./mvnw test
 ```
 
-Estado actual: pasan **las 40 pruebas**. Incluyen concurrencia de reservas,
+Estado actual: pasan **las 46 pruebas**. Incluyen concurrencia de reservas,
 el circuito completo de una reserva (disponibilidad, alta, rechazo del horario
-duplicado y confirmación desde el panel), cierres de agenda, el login y los
-avisos.
+duplicado y confirmación desde el panel), cierres de agenda, el límite de
+intentos, el login y los avisos.
 
 ### Verificar en perfiles
 
@@ -139,6 +139,9 @@ avisos.
 - CSRF está activado: el formulario del panel envía el token `_csrf`, que lee
   de la cookie `XSRF-TOKEN`.
 - Los teléfonos de los clientes se enmascaran en los logs.
+- El formulario público limita los intentos de reserva por IP (5 cada 10
+  minutos por defecto). Al superarlo responde `429` con `Retry-After`. El
+  conteo es en memoria: con varias instancias habría que compartirlo.
 
 Si en algún momento se sube un `.env` por error a Git, **no alcanza con
 borrarlo**: hay que rotar las credenciales, porque siguen en el historial.
@@ -186,6 +189,7 @@ y los enlaces funcionan igual que en producción.
 | Formulario de reserva con sus estados | ✅ Listo: crea reservas reales |
 | Login y acceso al panel del barbero | ✅ Listo y probado |
 | Backend de reservas (API) | ✅ Listo, con garantía anti-superposición |
+| Límite de intentos de reserva por IP | ✅ Listo (5 cada 10 minutos, configurable) |
 | Panel: listar, confirmar, completar y cancelar turnos | ✅ Listo |
 | Panel: cerrar días completos o franjas horarias | ✅ Listo |
 | Aviso por email al barbero | ✅ Listo (modo dry-run por defecto) |

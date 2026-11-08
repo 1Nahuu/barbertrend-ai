@@ -620,6 +620,9 @@
         <li>Errores uniformes con códigos claros (<code>SLOT_NOT_AVAILABLE</code>,
             <code>OUTSIDE_SCHEDULE</code>, <code>TOO_SOON</code>,
             <code>VALIDATION_ERROR</code>, etc.).</li>
+        <li>Límite de intentos de reserva por IP (5 cada 10 minutos,
+            configurable) con respuesta <code>429</code> y
+            <code>Retry-After</code>.</li>
     </ul>
 
     <h4>Sitio público conectado</h4>
@@ -778,6 +781,7 @@ Los dos starts_at son distintos, pero las dos personas quedan en la misma silla.
         <tr><td>CSRF</td><td>Activado. El token viaja en la cookie <code>XSRF-TOKEN</code> y en el campo <code>_csrf</code>. La API pública queda exceptuada.</td></tr>
         <tr><td>Datos personales</td><td>Sólo se guarda lo indispensable (nombre y teléfono). Los teléfonos se enmascaran en los logs y en los listados.</td></tr>
         <tr><td>Validación</td><td>En el servidor, no sólo en JavaScript.</td></tr>
+        <tr><td>Límite de intentos</td><td>5 reservas cada 10 minutos por IP; al superarlo, <code>429</code> con <code>Retry-After</code>.</td></tr>
         <tr><td>Errores</td><td>Respuestas uniformes; nunca se exponen detalles internos ni trazas al navegador.</td></tr>
     </table>
 
@@ -1124,10 +1128,9 @@ cd backend
     </ul>
 
     <div class="callout">
-        <strong>Mejoras cercanas al sistema de reservas</strong> (antes o junto
-        con la Etapa 4): extender un turno desde el panel cuando un corte se
-        pasa de hora, y avisar de los horarios que quedaron apretados al día
-        siguiente.
+        <strong>Decisión:</strong> extender turnos desde el panel fue
+        descartado. Si un corte se pasa de hora, esa situación se resuelve en
+        el local.
     </div>
 </section>
 
@@ -1154,9 +1157,14 @@ cd backend
             <td>Cuando haya más de uno</td>
         </tr>
         <tr>
-            <td>Sin <em>rate limiting</em> en el formulario público ni en el login</td>
-            <td>Uso interno y volumen bajo</td>
+            <td>Sin <em>rate limiting</em> en el login</td>
+            <td>El formulario público ya tiene límite; el panel es de uso interno</td>
             <td>Antes de exponer a internet</td>
+        </tr>
+        <tr>
+            <td>Rate limiting de reservas en memoria</td>
+            <td>El proyecto corre en una sola instancia</td>
+            <td>Si se despliega en varias instancias</td>
         </tr>
         <tr>
             <td>Sin paginación</td>

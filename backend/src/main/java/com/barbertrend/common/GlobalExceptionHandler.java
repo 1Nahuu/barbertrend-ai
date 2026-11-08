@@ -3,6 +3,7 @@ package com.barbertrend.common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -36,6 +37,21 @@ public class GlobalExceptionHandler {
         log.info("Error de negocio {}: {}", ex.getCode(), ex.getMessage());
         return ResponseEntity.status(ex.getStatus())
                 .body(ApiError.of(ex.getCode(), ex.getMessage(), ex.getField()));
+    }
+
+    /**
+     * Se superó el límite de intentos de reserva.
+     *
+     * <p>Además del código, se manda {@code Retry-After} para que el cliente
+     * sepa cuántos segundos esperar.
+     */
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<ApiError> handleRateLimit(RateLimitExceededException ex) {
+        log.warn("Límite de intentos alcanzado; reintentar en {} s.",
+                ex.getRetryAfterSeconds());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()))
+                .body(ApiError.of(ex.getCode(), ex.getMessage()));
     }
 
     /**

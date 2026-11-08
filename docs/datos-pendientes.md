@@ -65,11 +65,10 @@ barbero no puede garantizar.
 para saber **cuántos bloques de 30 minutos ocupa el turno en la agenda**. Sin
 eso no se puede calcular la disponibilidad ni evitar superposiciones.
 
-Consecuencia práctica a tener en cuenta: si a alguien con pelo abundante le
-reservaron 30 minutos y el corte se lleva 50, el turno se pasa de hora. Por eso
-en la **Etapa 3** el dueño va a poder **extender un turno desde el panel**
-cuando haga falta, y el sistema va a avisar de los horarios que quedaron
-apretados al día siguiente.
+Consecuencia práctica: si a alguien con pelo abundante le reservaron 30
+minutos y el corte se lleva 50, el turno se pasa de hora. Esa situación se
+maneja en el local. **Extender turnos desde el panel fue descartado** y no
+forma parte de la hoja de ruta.
 
 **Ninguna tarjeta dice "Más pedido".** Eso sería afirmar cuál es el más
 pedido, y no lo sabemos. Si querés marcarlo, agregá `popular: true` al

@@ -406,6 +406,22 @@ forma de probar todo el circuito sin credenciales y sin mandar mensajes reales.
 
 ---
 
+### 7.5 Límite de intentos de reserva
+
+El formulario público acepta como máximo **5 intentos por IP cada 10 minutos**
+(configurable con `RATE_LIMIT_*`). Se cuenta todo intento, incluso los que
+después fallan por una regla de negocio, para que no se pueda eludir el límite
+mandando datos inválidos. Al superarlo responde `429 RATE_LIMIT_EXCEEDED` con
+el encabezado `Retry-After`.
+
+El conteo vive en memoria (`ConcurrentHashMap`), porque el proyecto corre en
+una sola instancia. Con varias instancias, cada una contaría por separado y
+habría que moverlo a un almacenamiento compartido. La IP se toma de la
+conexión (`getRemoteAddr()`); detrás de un proxy hay que configurar
+`server.forward-headers-strategy`.
+
+---
+
 ## 8. Base de datos
 
 | Perfil | Base de datos | Para qué |
@@ -434,7 +450,7 @@ Cobertura mínima antes de dar por terminado un módulo: **crear turno válido,
 turno duplicado, turno en horario cerrado, turno en el pasado, validación de
 campos y acceso no autorizado al panel**.
 
-**Estado de la suite (verificado el 2026-11-08):** pasan **las 40 pruebas**.
+**Estado de la suite (verificado el 2026-11-08):** pasan **las 46 pruebas**.
 
 | Clase | Pruebas | Qué cubre |
 |---|---|---|
@@ -445,6 +461,8 @@ campos y acceso no autorizado al panel**.
 | `LoginSecurityTest` | 8 | Acceso al panel, CSRF y logout |
 | `WhatsAppLinkBuilderTest` | 6 | Normalización del teléfono argentino |
 | `EmailAppointmentNotifierTest` | 3 | Dry-run y contenido del email |
+| `BookingRateLimiterTest` | 5 | Límite, ventana, IPs distintas y reinicio |
+| `RateLimitApiTest` | 1 | Respuesta 429 con `Retry-After` |
 
 Las 2 fallas viejas de concurrencia quedaron resueltas con el cambio a
 `Persistable` descrito en §6.6.

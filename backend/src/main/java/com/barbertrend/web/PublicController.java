@@ -10,7 +10,9 @@ import com.barbertrend.dto.ServiceResponse;
 import com.barbertrend.repository.AppointmentRepository;
 import com.barbertrend.repository.ServiceOfferingRepository;
 import com.barbertrend.service.AvailabilityService;
+import com.barbertrend.service.BookingRateLimiter;
 import com.barbertrend.service.BookingService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.time.Clock;
 import java.time.LocalDate;
@@ -40,6 +42,7 @@ public class PublicController {
     private final AppointmentRepository appointmentRepository;
     private final AvailabilityService availabilityService;
     private final BookingService bookingService;
+    private final BookingRateLimiter rateLimiter;
     private final AppProperties properties;
     private final Clock clock;
 
@@ -47,12 +50,14 @@ public class PublicController {
                             AppointmentRepository appointmentRepository,
                             AvailabilityService availabilityService,
                             BookingService bookingService,
+                            BookingRateLimiter rateLimiter,
                             AppProperties properties,
                             Clock clock) {
         this.serviceRepository = serviceRepository;
         this.appointmentRepository = appointmentRepository;
         this.availabilityService = availabilityService;
         this.bookingService = bookingService;
+        this.rateLimiter = rateLimiter;
         this.properties = properties;
         this.clock = clock;
     }
@@ -86,7 +91,13 @@ public class PublicController {
     /** Crea una reserva. */
     @PostMapping("/appointments")
     public ResponseEntity<AppointmentCreatedResponse> createAppointment(
-            @Valid @RequestBody CreateAppointmentRequest request) {
+            @Valid @RequestBody CreateAppointmentRequest request,
+            HttpServletRequest httpRequest) {
+
+        // Se valida antes de tocar la base: si la IP ya superó el límite,
+        // no se procesa la reserva. Se usa la IP de la conexión; detrás de
+        // un proxy hay que configurar server.forward-headers-strategy.
+        rateLimiter.check(httpRequest.getRemoteAddr());
 
         var appointment = bookingService.create(
                 request.serviceId(),

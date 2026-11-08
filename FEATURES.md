@@ -39,7 +39,7 @@ Estado real de BarberTrend AI, actualizado al **2026-11-08**.
 | Validación de cierres | ✅ | Respuesta `422 BLOCKED_TIME` |
 | Código de turno | ✅ | Formato `BT-XXXXXX`, no secuencial |
 | Datos básicos del cliente | ✅ | Nombre y teléfono |
-| Límite de intentos (rate limiting) | ⬜ | Deuda técnica anotada |
+| Límite de intentos (rate limiting) | ✅ | 5 intentos por IP cada 10 min; `429` con `Retry-After` |
 | Cancelación o cambio por el cliente | ⬜ | Hoy se gestiona desde el panel |
 | Política de cancelación publicada | ⬜ | Falta definir el dato |
 
@@ -98,7 +98,7 @@ Estado real de BarberTrend AI, actualizado al **2026-11-08**.
 
 | Funcionalidad | Estado | Detalle |
 |---|---|---|
-| Pruebas automatizadas | ✅ | **40 pruebas, 0 fallos** (verificado 2026-11-08) |
+| Pruebas automatizadas | ✅ | **46 pruebas, 0 fallos** (verificado 2026-11-08) |
 | Integración continua | ✅ | GitHub Actions ejecuta `./mvnw test` |
 | Validación de datos en el servidor | ✅ | Bean Validation + reglas de negocio |
 | Credenciales fuera del repositorio | ✅ | `.env` ignorado; `.env.example` sin datos reales |
@@ -114,8 +114,16 @@ Estado real de BarberTrend AI, actualizado al **2026-11-08**.
 
 ## 7. Deuda técnica conocida
 
-- Falta *rate limiting* en el formulario público de reservas.
+- El *rate limiting* de reservas es en memoria y por instancia; el login no tiene límite de intentos.
 - Los cierres recurrentes semanales no están implementados (solo fechas y franjas).
 - Los servicios, horarios y datos del negocio se editan en un archivo, no desde el panel.
 - La API oficial de WhatsApp y la integración con IA están pendientes.
 - No hay auditoría de accesibilidad ni pruebas end-to-end en navegador.
+
+---
+
+## 8. Decisiones descartadas
+
+| Funcionalidad | Motivo |
+|---|---|
+| Extender turnos desde el panel (2026-11-08) | Si un corte se pasa de hora, se resuelve en el local. No forma parte de la hoja de ruta. |

@@ -46,6 +46,9 @@ public class AppProperties {
     /** Avisos al barbero (email; WhatsApp se arma a mano en el panel). */
     private Notifications notifications = new Notifications();
 
+    /** Límite de intentos de reserva por IP. */
+    private RateLimit rateLimit = new RateLimit();
+
     public String getTimezone() {
         return timezone;
     }
@@ -126,6 +129,14 @@ public class AppProperties {
         this.notifications = notifications;
     }
 
+    public RateLimit getRateLimit() {
+        return rateLimit;
+    }
+
+    public void setRateLimit(RateLimit rateLimit) {
+        this.rateLimit = rateLimit;
+    }
+
     /**
      * Configuración de los avisos.
      *
@@ -180,6 +191,48 @@ public class AppProperties {
 
         public void setFrom(String from) {
             this.from = from;
+        }
+    }
+
+    /**
+     * Límite de intentos de reserva.
+     *
+     * <p>Es una ventana fija en memoria, por IP. Alcanza para una sola
+     * instancia; si algún día se despliegan varias, el conteo tiene que
+     * pasar a un almacenamiento compartido.
+     */
+    public static class RateLimit {
+
+        private boolean enabled = true;
+
+        /** Intentos permitidos por IP dentro de la ventana. */
+        private int bookingMaxAttempts = 5;
+
+        /** Duración de la ventana, en minutos. */
+        private int bookingWindowMinutes = 10;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public int getBookingMaxAttempts() {
+            return bookingMaxAttempts;
+        }
+
+        public void setBookingMaxAttempts(int bookingMaxAttempts) {
+            this.bookingMaxAttempts = bookingMaxAttempts;
+        }
+
+        public int getBookingWindowMinutes() {
+            return bookingWindowMinutes;
+        }
+
+        public void setBookingWindowMinutes(int bookingWindowMinutes) {
+            this.bookingWindowMinutes = bookingWindowMinutes;
         }
     }
 

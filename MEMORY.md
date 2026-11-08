@@ -164,8 +164,8 @@ El valor del proyecto debe evaluarse según su utilidad para la barbería, no po
   "enviar". No usa librerías no oficiales.
 - Los datos del barbero (`BARBER_EMAIL`, `BARBER_WHATSAPP`) se leen del `.env`.
   Editable desde el panel queda para más adelante.
-- **Deuda pendiente:** no hay *rate limiting* en el formulario público. Está
-  anotado en el registro de deuda técnica.
+- **Deuda pendiente (resuelta en 9.6):** no había *rate limiting* en el
+  formulario público. Quedó anotado en el registro de deuda técnica.
 
 ### 9.3 Horarios y zona horaria (2026-11-06)
 
@@ -219,6 +219,21 @@ El valor del proyecto debe evaluarse según su utilidad para la barbería, no po
 - Esto también corrige el despliegue en cualquier servidor Linux que use UTC;
   no era solo un problema del CI.
 - Verificado: **40 pruebas, 0 fallos** en Linux sin `.env` y en Windows.
+
+### 9.6 Rate limiting y alcance descartado (2026-11-08)
+
+- Se descartó **extender turnos desde el panel**. Si un corte se pasa de hora,
+  se resuelve en el local. La funcionalidad no forma parte de la hoja de ruta.
+- Se agregó un límite de intentos de reserva por IP: **5 cada 10 minutos** por
+  defecto, configurable con `RATE_LIMIT_*`. Al superarlo responde
+  `429 RATE_LIMIT_EXCEEDED` con el encabezado `Retry-After`.
+- Se cuenta **todo intento**, incluso los que después fallan por una regla de
+  negocio, para que no se pueda eludir el límite con datos inválidos.
+- El conteo es una ventana fija en memoria (`ConcurrentHashMap`). Sirve para
+  una instancia; con varias hay que compartir el estado. La IP se toma de
+  `getRemoteAddr()`; detrás de un proxy hay que configurar
+  `server.forward-headers-strategy`.
+- La suite quedó en **46 pruebas, 0 fallos** en Windows y en Linux sin `.env`.
 
 ## 10. Mantenimiento de este archivo
 

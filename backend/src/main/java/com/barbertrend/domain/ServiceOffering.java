@@ -36,9 +36,9 @@ public class ServiceOffering {
      * Duración NOMINAL en minutos.
      *
      * <p>Un corte no dura siempre lo mismo: depende del pelo y de lo que
-     * pida el cliente. Este valor es el que la agenda usa por defecto para
-     * saber cuántos bloques ocupa el turno. El dueño puede extender un turno
-     * desde el panel cuando haga falta.
+     * pida el cliente. Este valor es el que la agenda usa para saber cuántos
+     * bloques ocupa el turno. El sistema no modifica la duración después de
+     * reservar.
      */
     @Column(name = "duration_minutes", nullable = false)
     private int durationMinutes;

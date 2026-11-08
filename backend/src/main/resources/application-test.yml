@@ -13,6 +13,12 @@ spring:
   flyway:
     enabled: true
 
+# Las pruebas HTTP comparten la misma IP (127.0.0.1). El límite real se
+# prueba aparte, en RateLimitApiTest, con propiedades propias.
+app:
+  rate-limit:
+    booking-max-attempts: 1000
+
 logging:
   level:
     root: WARN

@@ -64,6 +64,11 @@ app:
   slot-minutes: ${APP_SLOT_MINUTES:30}
   min-lead-minutes: ${APP_MIN_LEAD_MINUTES:120}
   max-advance-days: ${APP_MAX_ADVANCE_DAYS:60}
+  # Límite de intentos de reserva por IP. Es una ventana fija en memoria.
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    booking-max-attempts: ${RATE_LIMIT_BOOKING_MAX_ATTEMPTS:5}
+    booking-window-minutes: ${RATE_LIMIT_BOOKING_WINDOW_MINUTES:10}
   # URL base para los enlaces del código de reserva.
   # En producción tiene que ser el dominio real.
   public-base-url: ${APP_PUBLIC_BASE_URL:http://localhost:8080}

@@ -121,7 +121,13 @@ Crea una reserva. Estado inicial: `PENDING`.
 | `422 TOO_FAR_AHEAD` | Más allá del horizonte máximo de reserva |
 | `422 PAST_DATE` | Horario en el pasado |
 | `422 BLOCKED_TIME` | El horario está dentro de un cierre cargado desde el panel |
+| `429 RATE_LIMIT_EXCEEDED` | Demasiados intentos desde la misma IP |
 | `400 VALIDATION_ERROR` | Nombre o teléfono con formato inválido |
+
+El `429` incluye el encabezado `Retry-After` con los segundos que conviene
+esperar antes de reintentar. Por defecto se permiten 5 intentos cada 10
+minutos por IP (`RATE_LIMIT_*`). Se cuentan todos los intentos, incluso los
+que fallan por una regla de negocio.
 
 ### `GET /api/public/appointments/{reference}`
 
