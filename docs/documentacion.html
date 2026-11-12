@@ -234,10 +234,10 @@
     <div class="sub">Sistema de reservas y marketing con IA para Doble S Barbería</div>
     <div class="rule"></div>
     <div class="meta">
-        <div><b>Estado:</b> Etapa 3 cerrada · avisos funcionando</div>
-        <div><b>Fecha:</b> 23 de octubre de 2026</div>
+        <div><b>Estado:</b> Etapa 3 cerrada · servicios y horarios editables · avisos funcionando</div>
+        <div><b>Fecha:</b> 11 de noviembre de 2026</div>
         <div><b>Stack:</b> Java 21 · Spring Boot 4.1.1 · H2 / PostgreSQL</div>
-        <div><b>Pruebas:</b> 30 de 30 en verde</div>
+        <div><b>Pruebas:</b> 57 de 57 en verde</div>
         <div><b>Documento:</b> alcance actual + hoja de ruta</div>
     </div>
     <div class="footer">
@@ -571,6 +571,8 @@
         <tr><td>Backend de reservas</td><td><span class="badge b-ok">Listo</span>, con garantía anti-superposición</td></tr>
         <tr><td>Login y acceso al panel privado</td><td><span class="badge b-ok">Listo</span> y probado</td></tr>
         <tr><td>Panel: listar, confirmar, completar y cancelar turnos</td><td><span class="badge b-ok">Listo</span></td></tr>
+        <tr><td>Panel: crear, editar y desactivar servicios</td><td><span class="badge b-ok">Listo</span></td></tr>
+        <tr><td>Panel: editar el horario semanal</td><td><span class="badge b-ok">Listo</span></td></tr>
         <tr><td>Aviso por email al barbero</td><td><span class="badge b-ok">Listo</span> (dry-run por defecto)</td></tr>
         <tr><td>WhatsApp al cliente</td><td><span class="badge b-warn">Manual</span> con enlace <code>wa.me</code></td></tr>
         <tr><td>Asistente de marketing con IA</td><td><span class="badge b-off">Pendiente</span></td></tr>
@@ -601,9 +603,9 @@
             blancas internas.</li>
         <li>Cuatro fotos reales de cortes, optimizadas (hasta un 89 % menos de
             peso).</li>
-        <li>Todos los textos, precios y enlaces centralizados en
-            <code>site-config.js</code>: cambiar la barbería no requiere tocar
-            HTML ni CSS.</li>
+        <li>Los textos de marca, contacto y galería están en
+            <code>site-config.js</code>; los servicios y el horario se
+            administran desde el panel y se guardan en la base.</li>
     </ul>
 
     <h3>7.3 Etapa 3 — Reservas, panel y seguridad</h3>
@@ -643,6 +645,11 @@
             abrir WhatsApp.</li>
         <li>Los teléfonos se muestran enmascarados en el listado y completos
             sólo en el detalle, que es donde hacen falta.</li>
+        <li>Gestión del catálogo de servicios: crear, editar, ordenar, activar
+            y desactivar. Los servicios no se borran para conservar el
+            historial de turnos.</li>
+        <li>Edición del horario semanal: apertura, cierre o día cerrado. El
+            sitio público y el cálculo de disponibilidad usan ese horario.</li>
         <li>Cierre de sesión por POST (no por un enlace que podría dispararse
             sin querer).</li>
     </ul>
@@ -911,7 +918,7 @@ Los dos starts_at son distintos, pero las dos personas quedan en la misma silla.
 
     <p>
         La suite se ejecuta con <code>./mvnw test</code>. Estado actual:
-        <strong>40 de 40 en verde</strong>.
+        <strong>57 de 57 en verde</strong>.
     </p>
 
     <table>
@@ -920,9 +927,13 @@ Los dos starts_at son distintos, pero las dos personas quedan en la misma silla.
         <tr><td><code>ConcurrentBookingTest</code></td><td>2</td><td>20 reservas simultáneas al mismo horario: gana exactamente una.</td></tr>
         <tr><td><code>BookingFlowApiTest</code></td><td>3</td><td>Circuito completo: disponibilidad, alta, rechazo del duplicado, confirmación y WhatsApp.</td></tr>
         <tr><td><code>AdminBlockApiTest</code></td><td>9</td><td>Cierres completos y parciales, superposición, turnos existentes, reserva directa bloqueada y permisos.</td></tr>
+        <tr><td><code>AdminServiceApiTest</code></td><td>6</td><td>Alta y edición de servicios, nombres repetidos, activación/desactivación y acceso.</td></tr>
+        <tr><td><code>AdminBusinessHoursApiTest</code></td><td>5</td><td>Cierre de días, cambio de horario, validación y acceso.</td></tr>
         <tr><td><code>LoginSecurityTest</code></td><td>8</td><td>Acceso al panel, CSRF, redirecciones y cierre de sesión.</td></tr>
         <tr><td><code>WhatsAppLinkBuilderTest</code></td><td>6</td><td>Normalización del teléfono argentino al formato internacional.</td></tr>
         <tr><td><code>EmailAppointmentNotifierTest</code></td><td>3</td><td>Modo dry-run y contenido del email de aviso.</td></tr>
+        <tr><td><code>BookingRateLimiterTest</code></td><td>5</td><td>Límite de intentos, ventana de tiempo e IPs distintas.</td></tr>
+        <tr><td><code>RateLimitApiTest</code></td><td>1</td><td>Respuesta <code>429</code> con <code>Retry-After</code>.</td></tr>
     </table>
 
     <div class="callout">
@@ -933,7 +944,9 @@ Los dos starts_at son distintos, pero las dos personas quedan en la misma silla.
         que el enlace de WhatsApp se genera con el número normalizado y los
         acentos correctos. También se abrió el panel en Chrome headless y se
         verificó que renderiza la sección <strong>Cierres y bloqueos</strong> y
-        que carga la lista de cierres desde la API.
+        que carga la lista de cierres desde la API. En la misma prueba se creó,
+        editó y desactivó un servicio, se comprobó que deja de aparecer en el
+        sitio público, se cambió el horario de un día y se cerró otro.
     </div>
 </section>
 
@@ -1187,9 +1200,9 @@ cd backend
             <td>En la etapa de WhatsApp automático</td>
         </tr>
         <tr>
-            <td>Servicios y horarios se editan sólo desde la API/base, no desde el panel</td>
-            <td>El panel de gestión llega después</td>
-            <td>Próximos pasos del panel</td>
+            <td>Los datos de marca, contacto y galería se editan en <code>site-config.js</code></td>
+            <td>Los servicios y el horario ya se administran desde el panel; esos datos cambian menos seguido</td>
+            <td>Etapa posterior</td>
         </tr>
     </table>
 
@@ -1254,7 +1267,7 @@ cd backend
         fuentes de datos verificables.
     </p>
     <p style="margin-top:16pt; color:#5f5a52; font-size:9pt;">
-        Documento generado el 23 de octubre de 2026. Fuente editable:
+        Documento generado el 11 de noviembre de 2026. Fuente editable:
         <code>docs/documentacion.html</code>. Para regenerar el PDF:
         <code>google-chrome --headless --print-to-pdf=Documentacion-BarberTrend.pdf docs/documentacion.html</code>.
     </p>

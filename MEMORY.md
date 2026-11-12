@@ -235,6 +235,35 @@ El valor del proyecto debe evaluarse según su utilidad para la barbería, no po
   `server.forward-headers-strategy`.
 - La suite quedó en **46 pruebas, 0 fallos** en Windows y en Linux sin `.env`.
 
+### 9.7 Gestión de servicios y horarios desde el panel (2026-11-11)
+
+- **Los servicios y el horario de atención ya no se editan en archivos.** Se
+  administran desde `/admin` y se guardan en `service` y `business_hours`. El
+  sitio público los carga con `GET /api/public/services` y
+  `GET /api/public/business-hours`. `site-config.js` queda como **respaldo**
+  para que la web siga mostrando algo si la API no responde; la marca, el
+  contacto y la galería siguen viviendo ahí.
+- **Los servicios no se borran.** Se activan o desactivan para conservar el
+  historial de turnos. El panel valida que el nombre no se repita sin importar
+  mayúsculas y normaliza la descripción vacía a `null`.
+- **La respuesta pública de servicios incluye `durationMinutes`.** Antes no lo
+  hacía y el formulario de reserva dependía solo de `site-config.js`; ahora la
+  duración real de la base es la que usa la agenda. La duración no se muestra
+  como dato comercial.
+- **El horario se valida en el backend:** los días van de 1 a 7, un día abierto
+  necesita apertura y cierre, el cierre debe ser posterior y las horas deben
+  caer en bloques de 30 minutos. Al cerrar un día se borran sus horas viejas
+  para no dejar datos contradictorios.
+- **Cambiar el horario no cancela turnos ya reservados.** El panel lo advierte
+  explícitamente. Los cierres puntuales siguen siendo la herramienta que
+  rechaza el cierre si hay turnos activos.
+- El sitio público vuelve a calcular los días rápidos cuando termina de cargar
+  el horario real desde la API, para no mostrar un día cerrado como abierto (ni
+  al revés) mientras llega la respuesta.
+- La suite quedó en **57 pruebas, 0 fallos**, incluyendo alta y edición de
+  servicios, nombres duplicados, activación/desactivación, cierre de días,
+  cambio de horario y control de acceso.
+
 ## 10. Mantenimiento de este archivo
 
 Actualizar este documento cuando se tomen decisiones importantes.

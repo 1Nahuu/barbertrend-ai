@@ -744,6 +744,15 @@
             renderSlots();
             updateSummary();
         });
+
+        // El horario real llega por API después de dibujar la página. Se
+        // vuelven a calcular los días rápidos para no mostrar como cerrado
+        // un día que el dueño abrió, ni al revés.
+        window.addEventListener('bt:hours-loaded', function () {
+            renderQuickDates();
+            renderSlots();
+            updateSummary();
+        });
     }
 
     init();

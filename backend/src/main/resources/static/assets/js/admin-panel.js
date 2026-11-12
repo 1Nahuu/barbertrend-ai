@@ -2,7 +2,7 @@
  * admin-panel.js — Interfaz privada del barbero
  * ==========================================================================
  *
- *  Hace dos cosas:
+ *  Hace cinco cosas:
  *
  *    1. Prepara el cierre de sesión: copia el token CSRF de la cookie al
  *       formulario "Salir". El POST lo procesa Spring Security en
@@ -18,6 +18,14 @@
  *    3. Permite cerrar días completos o franjas horarias con
  *       /api/admin/blocks. Los cierres ocultan horarios en la web pública y
  *       el backend también los valida al reservar.
+ *
+ *    4. Administra el catálogo de servicios con /api/admin/services. Los
+ *       servicios no se borran: se desactivan para no romper el historial de
+ *       turnos.
+ *
+ *    5. Edita el horario semanal con /api/admin/business-hours. El sitio
+ *       público carga ese horario desde la API, así que el cambio se ve sin
+ *       tocar archivos.
  *
  *  Todas las llamadas de escritura mandan el header X-XSRF-TOKEN, que es
  *  lo que espera el CookieCsrfTokenRepository de Spring Security.
@@ -705,6 +713,522 @@
     }
 
     // ==========================================================================
+    // Servicios
+    // ==========================================================================
+
+    var servicesStatus = document.getElementById('services-status');
+    var servicesList = document.getElementById('services-list');
+    var serviceForm = document.getElementById('service-form');
+    var serviceFormTitle = document.getElementById('service-form-title');
+    var serviceNewButton = document.getElementById('service-new');
+    var serviceCancelButton = document.getElementById('service-cancel');
+    var serviceIdField = document.getElementById('service-id');
+    var serviceName = document.getElementById('service-name');
+    var serviceDescription = document.getElementById('service-description');
+    var servicePrice = document.getElementById('service-price');
+    var serviceDuration = document.getElementById('service-duration');
+    var serviceSort = document.getElementById('service-sort');
+    var serviceActive = document.getElementById('service-active');
+    var serviceError = document.getElementById('service-error');
+    var serviceSubmit = document.getElementById('service-submit');
+    var serviceCurrency = document.getElementById('service-currency');
+
+    var services = [];
+    var servicesBusy = false;
+
+    function showServicesStatus(type, title, message) {
+        renderStatus(servicesStatus, type, title, message);
+    }
+
+    function clearServicesStatus() {
+        if (servicesStatus) servicesStatus.innerHTML = '';
+    }
+
+    function setServiceError(message) {
+        if (serviceError) serviceError.textContent = message || '';
+    }
+
+    function formatPrice(value, currency) {
+        var amount = Number(value);
+
+        if (!isFinite(amount)) return '—';
+
+        try {
+            return new Intl.NumberFormat('es-AR', {
+                style: 'currency',
+                currency: currency || 'ARS',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            }).format(amount);
+        } catch (error) {
+            return '$ ' + amount;
+        }
+    }
+
+    function renderServices(items) {
+        if (!servicesList) return;
+
+        services = items || [];
+        servicesList.innerHTML = '';
+
+        if (services.length === 0) {
+            servicesList.appendChild(el('p', 'panel-empty',
+                'No hay servicios cargados. Creá el primero con el botón de arriba.'));
+            return;
+        }
+
+        if (serviceCurrency && services[0].currency) {
+            serviceCurrency.textContent = services[0].currency;
+        }
+
+        services.forEach(function (service) {
+            var item = el('article', 'service-item');
+            item.dataset.id = String(service.id);
+
+            var main = el('div', 'service-main');
+
+            var head = el('div', 'service-head');
+            head.appendChild(el('h3', 'service-name', service.name));
+
+            var badge = el('span', 'status-badge '
+                    + (service.active ? 'is-active' : 'is-inactive'),
+                service.active ? 'Activo' : 'Inactivo');
+            head.appendChild(badge);
+            main.appendChild(head);
+
+            main.appendChild(el('p', 'service-meta',
+                formatPrice(service.price, service.currency)
+                + ' · ' + service.durationMinutes + ' min'
+                + ' · Orden ' + service.sortOrder));
+
+            if (service.description) {
+                main.appendChild(el('p', 'service-description',
+                    service.description));
+            }
+
+            item.appendChild(main);
+
+            var actions = el('div', 'service-actions');
+
+            var editButton = el('button', 'btn btn-outline btn-sm', 'Editar');
+            editButton.type = 'button';
+            editButton.dataset.action = 'edit-service';
+            editButton.dataset.id = String(service.id);
+            actions.appendChild(editButton);
+
+            var toggleButton = el('button', 'btn btn-outline btn-sm',
+                service.active ? 'Desactivar' : 'Activar');
+            toggleButton.type = 'button';
+            toggleButton.dataset.action = 'toggle-service';
+            toggleButton.dataset.id = String(service.id);
+            actions.appendChild(toggleButton);
+
+            item.appendChild(actions);
+            servicesList.appendChild(item);
+        });
+    }
+
+    async function loadServices() {
+        if (servicesBusy || !servicesList) return;
+
+        servicesBusy = true;
+        showServicesStatus('info', 'Cargando servicios…', 'Un segundo.');
+
+        try {
+            var items = await apiFetch('/api/admin/services');
+            clearServicesStatus();
+            renderServices(items);
+        } catch (error) {
+            showServicesStatus('error', 'No pudimos cargar los servicios.',
+                error.message);
+        } finally {
+            servicesBusy = false;
+        }
+    }
+
+    function openServiceForm(service) {
+        if (!serviceForm) return;
+
+        serviceForm.hidden = false;
+        setServiceError('');
+
+        if (service) {
+            if (serviceFormTitle) serviceFormTitle.textContent = 'Editar servicio';
+            if (serviceSubmit) serviceSubmit.textContent = 'Guardar cambios';
+            if (serviceIdField) serviceIdField.value = String(service.id);
+            if (serviceName) serviceName.value = service.name;
+            if (serviceDescription) serviceDescription.value = service.description || '';
+            if (servicePrice) servicePrice.value = service.price;
+            if (serviceDuration) serviceDuration.value = service.durationMinutes;
+            if (serviceSort) serviceSort.value = service.sortOrder;
+            if (serviceActive) serviceActive.checked = service.active;
+        } else {
+            serviceForm.reset();
+            if (serviceFormTitle) serviceFormTitle.textContent = 'Nuevo servicio';
+            if (serviceSubmit) serviceSubmit.textContent = 'Crear servicio';
+            if (serviceIdField) serviceIdField.value = '';
+            if (serviceActive) serviceActive.checked = true;
+            if (serviceDuration) serviceDuration.value = 30;
+            if (serviceSort) serviceSort.value = 0;
+        }
+
+        serviceForm.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        if (serviceName) serviceName.focus();
+    }
+
+    function closeServiceForm() {
+        if (!serviceForm) return;
+
+        serviceForm.hidden = true;
+        serviceForm.reset();
+        setServiceError('');
+    }
+
+    async function saveService(event) {
+        event.preventDefault();
+
+        setServiceError('');
+
+        var id = serviceIdField && serviceIdField.value
+            ? Number(serviceIdField.value)
+            : null;
+        var name = serviceName ? serviceName.value.trim() : '';
+        var description = serviceDescription ? serviceDescription.value.trim() : '';
+        var price = servicePrice ? Number(servicePrice.value) : NaN;
+        var duration = serviceDuration ? Number(serviceDuration.value) : NaN;
+        var sort = serviceSort && serviceSort.value !== ''
+            ? Number(serviceSort.value)
+            : 0;
+        var active = !!(serviceActive && serviceActive.checked);
+
+        if (!name) {
+            setServiceError('Escribí el nombre del servicio.');
+            if (serviceName) serviceName.focus();
+            return;
+        }
+
+        if (!isFinite(price) || price < 0) {
+            setServiceError('El precio tiene que ser un número igual o mayor a cero.');
+            if (servicePrice) servicePrice.focus();
+            return;
+        }
+
+        if (!isFinite(duration) || duration < 1 || Math.floor(duration) !== duration) {
+            setServiceError('La duración tiene que ser un número entero mayor a cero.');
+            if (serviceDuration) serviceDuration.focus();
+            return;
+        }
+
+        if (!isFinite(sort) || sort < 0 || Math.floor(sort) !== sort) {
+            setServiceError('El orden tiene que ser un número entero igual o mayor a cero.');
+            if (serviceSort) serviceSort.focus();
+            return;
+        }
+
+        var payload = {
+            name: name,
+            description: description || null,
+            price: price,
+            durationMinutes: duration,
+            active: active,
+            sortOrder: sort
+        };
+
+        if (serviceSubmit) serviceSubmit.disabled = true;
+        showServicesStatus('info', 'Guardando el servicio…', 'Un segundo.');
+
+        try {
+            await apiFetch(
+                id ? '/api/admin/services/' + id : '/api/admin/services',
+                {
+                    method: id ? 'PUT' : 'POST',
+                    body: JSON.stringify(payload)
+                }
+            );
+
+            closeServiceForm();
+            clearServicesStatus();
+            await loadServices();
+            showServicesStatus('success',
+                id ? 'Servicio actualizado.' : 'Servicio creado.',
+                'El catálogo público ya muestra los cambios.');
+        } catch (error) {
+            showServicesStatus('error', 'No pudimos guardar el servicio.',
+                error.message);
+            setServiceError(error.message);
+        } finally {
+            if (serviceSubmit) serviceSubmit.disabled = false;
+        }
+    }
+
+    async function toggleService(service) {
+        var activate = !service.active;
+
+        try {
+            await apiFetch('/api/admin/services/' + service.id
+                    + '/active?active=' + activate, { method: 'PATCH' });
+
+            clearServicesStatus();
+            await loadServices();
+            showServicesStatus('success',
+                activate ? 'Servicio activado.' : 'Servicio desactivado.',
+                activate
+                    ? 'Ya se puede reservar de nuevo.'
+                    : 'Dejó de ofrecerse en la web, pero sus turnos se conservan.');
+        } catch (error) {
+            showServicesStatus('error', 'No pudimos cambiar el servicio.',
+                error.message);
+        }
+    }
+
+    function findService(id) {
+        for (var i = 0; i < services.length; i++) {
+            if (services[i].id === id) return services[i];
+        }
+        return null;
+    }
+
+    function onServicesClick(event) {
+        var button = event.target.closest('button[data-action]');
+        if (!button) return;
+
+        var id = Number(button.dataset.id);
+        var service = findService(id);
+        if (!service) return;
+
+        if (button.dataset.action === 'edit-service') {
+            openServiceForm(service);
+            return;
+        }
+
+        if (button.dataset.action === 'toggle-service') {
+            button.disabled = true;
+            toggleService(service).finally(function () {
+                if (button.isConnected) button.disabled = false;
+            });
+        }
+    }
+
+    function initServices() {
+        if (!servicesList) return;
+
+        servicesList.addEventListener('click', onServicesClick);
+
+        if (serviceNewButton) {
+            serviceNewButton.addEventListener('click', function () {
+                openServiceForm(null);
+            });
+        }
+
+        if (serviceCancelButton) {
+            serviceCancelButton.addEventListener('click', closeServiceForm);
+        }
+
+        if (serviceForm) {
+            serviceForm.addEventListener('submit', saveService);
+        }
+
+        loadServices();
+    }
+
+    // ==========================================================================
+    // Horario de atención
+    // ==========================================================================
+
+    var hoursStatus = document.getElementById('hours-status');
+    var hoursList = document.getElementById('hours-list');
+
+    function showHoursStatus(type, title, message) {
+        renderStatus(hoursStatus, type, title, message);
+    }
+
+    function clearHoursStatus() {
+        if (hoursStatus) hoursStatus.innerHTML = '';
+    }
+
+    function capitalize(text) {
+        return text ? text.charAt(0).toUpperCase() + text.slice(1) : '';
+    }
+
+    function hoursValue(value) {
+        return value ? value.substring(0, 5) : '';
+    }
+
+    function syncHoursRow(form) {
+        if (!form) return;
+
+        var closedInput = form.querySelector('input[data-role="closed"]');
+        var openInput = form.querySelector('input[data-role="open"]');
+        var closeInput = form.querySelector('input[data-role="close"]');
+        var closed = !!(closedInput && closedInput.checked);
+
+        if (openInput) openInput.disabled = closed;
+        if (closeInput) closeInput.disabled = closed;
+
+        // Al reabrir un día que estaba cerrado no hay horas guardadas.
+        // Se proponen las mismas que usa la barbería de lunes a sábado.
+        if (!closed && openInput && !openInput.value) openInput.value = '09:00';
+        if (!closed && closeInput && !closeInput.value) closeInput.value = '21:00';
+    }
+
+    function renderHours(days) {
+        if (!hoursList) return;
+
+        hoursList.innerHTML = '';
+
+        if (!days || days.length === 0) {
+            hoursList.appendChild(el('p', 'panel-empty',
+                'No hay horario cargado. Revisá la migración de la base.'));
+            return;
+        }
+
+        days.forEach(function (day) {
+            var form = el('form', 'hours-item');
+            form.dataset.day = String(day.dayOfWeek);
+            form.setAttribute('novalidate', '');
+
+            var openId = 'hours-open-' + day.dayOfWeek;
+            var closeId = 'hours-close-' + day.dayOfWeek;
+            var closedId = 'hours-closed-' + day.dayOfWeek;
+
+            form.appendChild(el('div', 'hours-day', capitalize(day.dayName)));
+
+            var closedLabel = el('label', 'checkbox-label');
+            var closedInput = document.createElement('input');
+            closedInput.type = 'checkbox';
+            closedInput.id = closedId;
+            closedInput.checked = !!day.closed;
+            closedInput.dataset.role = 'closed';
+            closedLabel.appendChild(closedInput);
+            closedLabel.appendChild(document.createTextNode(' Cerrado'));
+            form.appendChild(closedLabel);
+
+            var openField = el('div', 'field');
+            var openLabel = el('label', 'label', 'Apertura');
+            openLabel.setAttribute('for', openId);
+            var openInput = document.createElement('input');
+            openInput.type = 'time';
+            openInput.className = 'input';
+            openInput.id = openId;
+            openInput.step = '1800';
+            openInput.value = hoursValue(day.openTime);
+            openInput.dataset.role = 'open';
+            openField.appendChild(openLabel);
+            openField.appendChild(openInput);
+            form.appendChild(openField);
+
+            var closeField = el('div', 'field');
+            var closeLabel = el('label', 'label', 'Cierre');
+            closeLabel.setAttribute('for', closeId);
+            var closeInput = document.createElement('input');
+            closeInput.type = 'time';
+            closeInput.className = 'input';
+            closeInput.id = closeId;
+            closeInput.step = '1800';
+            closeInput.value = hoursValue(day.closeTime);
+            closeInput.dataset.role = 'close';
+            closeField.appendChild(closeLabel);
+            closeField.appendChild(closeInput);
+            form.appendChild(closeField);
+
+            var actions = el('div', 'hours-actions');
+            var saveButton = el('button', 'btn btn-primary btn-sm', 'Guardar');
+            saveButton.type = 'submit';
+            actions.appendChild(saveButton);
+            form.appendChild(actions);
+
+            syncHoursRow(form);
+            hoursList.appendChild(form);
+        });
+    }
+
+    async function loadHours() {
+        if (!hoursList) return;
+
+        showHoursStatus('info', 'Cargando horario…', 'Un segundo.');
+
+        try {
+            var data = await apiFetch('/api/admin/business-hours');
+            clearHoursStatus();
+            renderHours(data ? data.days : null);
+        } catch (error) {
+            showHoursStatus('error', 'No pudimos cargar el horario.',
+                error.message);
+        }
+    }
+
+    async function saveHours(event) {
+        event.preventDefault();
+
+        var form = event.target.closest('.hours-item');
+        if (!form) return;
+
+        var day = Number(form.dataset.day);
+        var closedInput = form.querySelector('input[data-role="closed"]');
+        var openInput = form.querySelector('input[data-role="open"]');
+        var closeInput = form.querySelector('input[data-role="close"]');
+        var closed = !!(closedInput && closedInput.checked);
+        var open = openInput ? openInput.value : '';
+        var close = closeInput ? closeInput.value : '';
+
+        if (!closed) {
+            if (!open || !close) {
+                showHoursStatus('error', 'Faltan las horas.',
+                    'Indicá la apertura y el cierre, o marcá el día como cerrado.');
+                return;
+            }
+
+            if (close <= open) {
+                showHoursStatus('error', 'El horario no es válido.',
+                    'El cierre tiene que ser posterior a la apertura.');
+                return;
+            }
+        }
+
+        var payload = {
+            openTime: closed ? null : open,
+            closeTime: closed ? null : close,
+            closed: closed
+        };
+
+        var button = form.querySelector('button[type="submit"]');
+        if (button) button.disabled = true;
+
+        showHoursStatus('info', 'Guardando el horario…', 'Un segundo.');
+
+        try {
+            await apiFetch('/api/admin/business-hours/' + day, {
+                method: 'PUT',
+                body: JSON.stringify(payload)
+            });
+
+            clearHoursStatus();
+            await loadHours();
+            showHoursStatus('success', 'Horario guardado.',
+                'La web pública ya muestra el cambio.');
+        } catch (error) {
+            showHoursStatus('error', 'No pudimos guardar el horario.',
+                error.message);
+        } finally {
+            if (button && button.isConnected) button.disabled = false;
+        }
+    }
+
+    function initHours() {
+        if (!hoursList) return;
+
+        hoursList.addEventListener('change', function (event) {
+            var closedInput = event.target.closest('input[data-role="closed"]');
+            if (!closedInput) return;
+
+            syncHoursRow(closedInput.closest('.hours-item'));
+        });
+
+        hoursList.addEventListener('submit', saveHours);
+        loadHours();
+    }
+
+    // ==========================================================================
     // Logout
     // ==========================================================================
 
@@ -770,6 +1294,8 @@
     function init() {
         initLogout();
         initCancelDialog();
+        initServices();
+        initHours();
         initBlocks();
 
         if (list) {

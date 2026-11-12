@@ -1,6 +1,6 @@
 # FEATURES.md — Inventario de funcionalidades
 
-Estado real de BarberTrend AI, actualizado al **2026-11-08**.
+Estado real de BarberTrend AI, actualizado al **2026-11-11**.
 
 **Leyenda:** ✅ implementado y probado · 🟡 parcial o con limitaciones · ⬜ pendiente
 
@@ -11,14 +11,14 @@ Estado real de BarberTrend AI, actualizado al **2026-11-08**.
 | Funcionalidad | Estado | Detalle |
 |---|---|---|
 | Diseño responsive | ✅ | Móvil, tablet y computadora |
-| Datos de la barbería centralizados | ✅ | `static/assets/js/site-config.js` |
-| Servicios y precios | ✅ | 4 servicios con datos reales |
+| Datos de la barbería centralizados | ✅ | Marca, contacto y galería en `site-config.js`; servicios y horario en la base |
+| Servicios y precios | ✅ | Desde la base; se editan en el panel |
 | Galería de fotos | ✅ | 4 imágenes en `static/assets/img/` |
-| Horarios de atención | ✅ | Lunes a sábado, 09:00–21:00 |
+| Horarios de atención | ✅ | Desde la base; se editan en el panel |
 | Contacto y redes | ✅ | WhatsApp e Instagram reales |
 | Botón flotante de WhatsApp | ✅ | Enlace `wa.me` |
 | Navegación por secciones | ✅ | Sin dependencias de JavaScript externas |
-| Aviso de datos de ejemplo | ✅ | Se activa con `showSampleDataNotice` |
+| Aviso de sitio en construcción | ✅ | Se activa con `showSampleDataNotice`; hoy avisa que los textos son provisionales |
 | Accesibilidad y contraste | 🟡 | Revisión básica; falta auditoría formal |
 
 ---
@@ -58,9 +58,9 @@ Estado real de BarberTrend AI, actualizado al **2026-11-08**.
 | Cerrar días completos o rangos | ✅ | Con detección de turnos superpuestos |
 | Cerrar franjas horarias | ✅ | Bloques de 30 minutos |
 | Eliminar cierres | ✅ | `DELETE /api/admin/blocks/{id}` |
-| Gestión de servicios desde el panel | ⬜ | Por ahora se editan en `site-config.js` |
-| Gestión de horarios desde el panel | ⬜ | Por ahora se editan en `site-config.js` |
-| Edición de datos del negocio | ⬜ | Por ahora se editan en `site-config.js` |
+| Gestión de servicios desde el panel | ✅ | Crear, editar, ordenar, activar y desactivar |
+| Gestión de horarios desde el panel | ✅ | Editar apertura/cierre y cerrar días |
+| Edición de datos del negocio | ⬜ | Marca, contacto y galería se editan en `site-config.js` |
 
 ---
 
@@ -98,7 +98,7 @@ Estado real de BarberTrend AI, actualizado al **2026-11-08**.
 
 | Funcionalidad | Estado | Detalle |
 |---|---|---|
-| Pruebas automatizadas | ✅ | **46 pruebas, 0 fallos** (verificado 2026-11-08) |
+| Pruebas automatizadas | ✅ | **57 pruebas, 0 fallos** (verificado 2026-11-11) |
 | Integración continua | ✅ | GitHub Actions ejecuta `./mvnw test` |
 | Validación de datos en el servidor | ✅ | Bean Validation + reglas de negocio |
 | Credenciales fuera del repositorio | ✅ | `.env` ignorado; `.env.example` sin datos reales |
@@ -116,7 +116,8 @@ Estado real de BarberTrend AI, actualizado al **2026-11-08**.
 
 - El *rate limiting* de reservas es en memoria y por instancia; el login no tiene límite de intentos.
 - Los cierres recurrentes semanales no están implementados (solo fechas y franjas).
-- Los servicios, horarios y datos del negocio se editan en un archivo, no desde el panel.
+- Cambiar el horario semanal no cancela turnos ya reservados; el panel lo advierte y las reservas nuevas sí se validan contra el horario.
+- Los datos de marca, contacto y galería se editan en `site-config.js`, no desde el panel.
 - La API oficial de WhatsApp y la integración con IA están pendientes.
 - No hay auditoría de accesibilidad ni pruebas end-to-end en navegador.
 

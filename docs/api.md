@@ -58,6 +58,20 @@ Servicios activos, ordenados.
 ]
 ```
 
+### `GET /api/public/business-hours`
+
+Horario de atención de los siete días. Lo usa el sitio para mostrar la tabla
+de horarios. Un día cerrado llega con `openTime` y `closeTime` en `null`.
+
+```json
+{
+  "days": [
+    { "dayOfWeek": 1, "dayName": "lunes", "openTime": "09:00:00", "closeTime": "21:00:00", "closed": false },
+    { "dayOfWeek": 7, "dayName": "domingo", "openTime": null, "closeTime": null, "closed": true }
+  ]
+}
+```
+
 ### `GET /api/public/availability`
 
 Horarios libres para un servicio en una fecha.
@@ -69,12 +83,12 @@ Horarios libres para un servicio en una fecha.
   "date": "2026-10-20",
   "serviceId": 1,
   "serviceName": "Corte clásico",
-  "durationMinutes": 30,
   "timezone": "America/Argentina/Buenos_Aires",
+  "currency": "ARS",
   "closed": false,
   "slots": [
-    { "startsAt": "2026-10-20T09:00:00", "available": true },
-    { "startsAt": "2026-10-20T09:30:00", "available": false }
+    { "startsAt": "2026-10-20T09:00:00" },
+    { "startsAt": "2026-10-20T09:30:00" }
   ]
 }
 ```
@@ -191,6 +205,47 @@ Requieren sesión iniciada (la misma del panel). Sin sesión: `401` en JSON.
 Las operaciones de escritura usan **peticiones idempotentes donde tiene
 sentido**: por ejemplo, desactivar un servicio ya desactivado devuelve éxito
 en lugar de un error.
+
+### Servicios
+
+`POST /api/admin/services` crea y `PUT /api/admin/services/{id}` modifica. El
+cuerpo es el mismo:
+
+```json
+{
+  "name": "Corte clásico",
+  "description": "Corte a tijera y máquina.",
+  "price": 12000.00,
+  "durationMinutes": 30,
+  "active": true,
+  "sortOrder": 1
+}
+```
+
+- `name` es obligatorio y no se puede repetir, sin importar mayúsculas.
+- `price` no puede ser negativo y `durationMinutes` tiene que ser mayor a cero.
+- `sortOrder` define el orden en la web: los números más bajos van primero.
+- La descripción vacía se guarda como `null`.
+- Los servicios no se borran. `PATCH /api/admin/services/{id}/active?active=false`
+  los oculta de la web sin romper los turnos existentes.
+
+### Horario de atención
+
+`PUT /api/admin/business-hours/{dayOfWeek}` actualiza un día (`1` = lunes,
+`7` = domingo):
+
+```json
+{
+  "openTime": "09:00",
+  "closeTime": "21:00",
+  "closed": false
+}
+```
+
+Para cerrar un día se envía `"closed": true`; la apertura y el cierre se
+guardan en `null`. Si el día está abierto, ambas horas son obligatorias, el
+cierre tiene que ser posterior a la apertura y las horas deben caer en bloques
+de 30 minutos.
 
 ### Detalle de un turno
 

@@ -1,13 +1,14 @@
 # Datos que faltan — BarberTrend AI
 
-Este proyecto **no inventa datos reales de la barbería**. Hasta que se
-completen, el sitio funciona con **datos de ejemplo claramente marcados**.
+Este proyecto **no inventa datos reales de la barbería**. Los datos que faltan
+están marcados como pendientes y los textos provisionales se identifican en el
+sitio.
 
 Cada ítem indica dónde se usa hoy y en qué etapa hay que configurarlo.
 
-> **Etapa 2 ya está hecha**: el sitio donde van estos datos es
-> `backend/src/main/resources/static/assets/js/site-config.js`. Se puede
-> cargar la información en cualquier momento, sin rehacer nada.
+> **Servicios y horario ya se administran desde el panel.** Se guardan en la
+> base y el sitio los carga por API. Los demás datos de marca, contacto y
+> galería siguen en `backend/src/main/resources/static/assets/js/site-config.js`.
 
 ---
 
@@ -26,8 +27,8 @@ Cada ítem indica dónde se usa hoy y en qué etapa hay que configurarlo.
 | 9 | Dirección | ✅ REAL · oculta | Bolívar 3008 (sacada de la página) | 2 |
 | 10 | Mapa / coordenadas | 🟡 SIN USO | Se sacó la tarjeta de Ubicación | 2 |
 | 11 | Cómo llegar | ⬜ SIN USO | Se sacó la tarjeta de Ubicación | 2 |
-| 12 | Horario por día | ✅ REAL | Lun a Sáb, dom. cerrado | 2 / 3 |
-| 13 | Catálogo de servicios | ✅ REAL | 4 servicios con precio | 2 / 3 |
+| 12 | Horario por día | ✅ REAL | Panel → base de datos | 2 / 3 |
+| 13 | Catálogo de servicios | ✅ REAL | Panel → base de datos | 2 / 3 |
 | 14 | Nombre del barbero | ⬜ FALTA | `barber` | 3 |
 | 15 | Fotografías de la barbería | ✅ 4 FOTOS | Galería | 2 |
 | 16 | Más fotos de cortes | ⬜ FALTAN | Galería | 2 |
@@ -56,6 +57,9 @@ Cada ítem indica dónde se usa hoy y en qué etapa hay que configurarlo.
 | Corte + barba | 60 min | $ 15.000 |
 | Corte infantil | 30 min | $ 9.000 |
 
+Estos son los valores cargados en la base. Se editan desde el panel, no en este
+archivo.
+
 **Las duraciones no se muestran al cliente, a propósito.** Un corte no dura
 siempre lo mismo: depende del pelo, de cuánto hace que el cliente no se corta
 y de lo que pida. Poner "30 min" en la tarjeta sería una cifra que el propio
@@ -71,8 +75,9 @@ maneja en el local. **Extender turnos desde el panel fue descartado** y no
 forma parte de la hoja de ruta.
 
 **Ninguna tarjeta dice "Más pedido".** Eso sería afirmar cuál es el más
-pedido, y no lo sabemos. Si querés marcarlo, agregá `popular: true` al
-servicio correspondiente en `site-config.js`.
+pedido, y no lo sabemos. El modelo de datos no tiene un campo para marcarlo;
+si más adelante se quiere, hay que agregarlo al servicio y al formulario del
+panel.
 
 ## Horario de atención (real)
 
@@ -96,7 +101,7 @@ sobre `#contact-address` y `#map-link`.
 
 ---
 
-## Datos reales cargados (Etapa 2)
+## Datos reales cargados
 
 Del logo que aportaste en `barberia doble s/` y de lo que confirmaste:
 
@@ -107,7 +112,7 @@ Del logo que aportaste en `barberia doble s/` y de lo que confirmaste:
 | Dirección | Bolívar 3008 (guardada, no mostrada) |
 | Teléfonos | 2284 239845 · 2284 245945 |
 | WhatsApp | `+54 9 2284 239845` — confirmado por el dueño |
-| Horario | Lun–Jue 9–19, Vie 9–20, Sáb 9–14, Dom cerrado |
+| Horario | Lun–Sáb 09:00–21:00, Dom cerrado (editable desde el panel) |
 | Servicios | Corte clásico 12.000 · Barba 12.000 · Corte+barba 15.000 · Infantil 9.000 |
 | Logo | `assets/img/logo-doble-s.png` |
 | Fotos de la galería | 4 fotos de cortes reales |
@@ -118,14 +123,14 @@ Los **textos de la portada** ("Corte con carácter, barba con detalle") y el
 **eslogan** que aparece junto al logo. Son redaccionables: pasame los tuyos y
 los cambio.
 
-Por eso el aviso del pie dice lo que dice: *"Las reservas online todavía no
-están habilitadas"*, que es la única limitación real que le queda al sitio.
+Por eso el aviso del pie sigue visible: *"Sitio en construcción. Los textos de
+presentación son provisionales."*
 
 ---
 
-## Cómo se van a reemplazar los datos de ejemplo
+## Cómo se reemplazan los datos
 
-### Datos que viven en el sitio (Etapa 2)
+### Marca, contacto y galería
 
 Están **centralizados en un solo archivo**:
 
@@ -133,21 +138,20 @@ Están **centralizados en un solo archivo**:
 backend/src/main/resources/static/assets/js/site-config.js
 ```
 
-Ese archivo tiene un bloque `SITE_CONFIG` con todos los textos, precios,
-horarios y enlaces. Para cambiar la barbería real se edita **solo ese
-archivo**, sin tocar el HTML ni el CSS.
+Ese archivo tiene un bloque `SITE_CONFIG` con los textos, contactos, enlaces y
+la galería. También conserva una **lista de respaldo** de servicios y horarios,
+que se usa solo si la API no responde.
 
-Mientras los valores sean de ejemplo, la web muestra un aviso visible en el
-pie: *"Sitio en construcción — se muestran datos de ejemplo"*.
+Mientras los textos de presentación sean provisionales, la web muestra un aviso
+visible en el pie: *"Sitio en construcción. Los textos de presentación son
+provisionales."*
 
-### Datos que pasan a la base de datos (Etapa 3)
+### Servicios, horario y bloqueos (base de datos)
 
-El horario de atención, el catálogo de servicios y los bloqueos de agenda
-**no** van a quedar en el código: se cargan desde el panel del dueño y se
-guardan en la base. Esos datos se administran en `/admin`.
-
-Los servicios y el horario se cargarán por primera vez mediante migraciones de
-Flyway con los datos definitivos.
+El catálogo de servicios, el horario semanal y los cierres de agenda se
+administran desde `/admin` y se guardan en la base. **Ya no se editan en
+archivos.** Los datos iniciales se cargaron con migraciones de Flyway y, a
+partir de ahí, los cambios los hace el dueño desde el panel.
 
 ### Datos que van en variables de entorno (nunca en el código)
 
@@ -226,10 +230,11 @@ y sumá un objeto con `title` y `src` al array `gallery` de `site-config.js`.
 | Dato | Va en | Por qué ahí |
 |---|---|---|
 | Nombre, dirección, teléfonos, Instagram | `site-config.js` | Se muestran en la web |
-| Precios, horarios, eslogan | `site-config.js` (ahora) | Después pasan al panel |
+| Eslogan y textos de portada | `site-config.js` | Son textos editoriales |
+| Precios, duraciones y servicios | Panel `/admin` → base | Los cambia el dueño sin tocar código |
+| Horarios de atención | Panel `/admin` → base | Se usan para calcular la disponibilidad |
 | Logo y fotos | `static/assets/img/` | Son archivos, no datos |
 | Contraseñas, tokens, claves de API | `.env` | Nunca en el repositorio |
-| Horarios y servicios definitivos | Panel `/admin` → base de datos | Los cambia el dueño sin tocar código |
 
 ## Nada de esto se inventa
 

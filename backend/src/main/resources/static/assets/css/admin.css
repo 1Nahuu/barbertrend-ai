@@ -274,7 +274,8 @@
     margin-top: 0.75rem;
 }
 
-.appointments-empty {
+.appointments-empty,
+.panel-empty {
     margin: 0;
     padding: 1.25rem;
     color: var(--text-muted);
@@ -380,6 +381,18 @@
     border-color: rgba(224, 92, 92, 0.4);
 }
 
+.status-badge.is-active {
+    color: var(--success);
+    background: var(--success-bg);
+    border-color: rgba(76, 175, 125, 0.4);
+}
+
+.status-badge.is-inactive {
+    color: var(--text-muted);
+    background: rgba(168, 162, 154, 0.12);
+    border-color: var(--border-strong);
+}
+
 /* --- Botones propios del panel --- */
 
 .btn-whatsapp {
@@ -407,7 +420,143 @@
 }
 
 /* ==========================================================================
-   3.2 Cierres y bloqueos
+   3.2 Servicios
+   ========================================================================== */
+
+.panel-services,
+.panel-hours {
+    max-width: none;
+    margin-top: 1.5rem;
+}
+
+.services-list,
+.hours-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.service-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 1rem 1.15rem;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.service-main {
+    flex: 1 1 16rem;
+    min-width: 0;
+}
+
+.service-head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.2rem;
+}
+
+.service-name {
+    margin: 0;
+    font-size: 1.05rem;
+}
+
+.service-meta,
+.service-description {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+}
+
+.service-description {
+    margin-top: 0.35rem;
+}
+
+.service-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.service-form {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+/* El atributo hidden tiene que ganarle al display:block del formulario. */
+.service-form[hidden] {
+    display: none;
+}
+
+.service-form-title {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.service-form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.panel-form-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-top: 0.25rem;
+}
+
+/* ==========================================================================
+   3.3 Horario de atención
+   ========================================================================== */
+
+.hours-item {
+    display: grid;
+    grid-template-columns:
+        minmax(7rem, 0.8fr)
+        auto
+        minmax(8rem, 1fr)
+        minmax(8rem, 1fr)
+        auto;
+    align-items: end;
+    gap: 1rem;
+    padding: 1rem 1.15rem;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.hours-day {
+    align-self: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+}
+
+.hours-item .field {
+    margin: 0;
+}
+
+.hours-item .checkbox-label {
+    align-self: center;
+}
+
+.hours-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* ==========================================================================
+   3.4 Cierres y bloqueos
    ========================================================================== */
 
 .panel-blocks {
@@ -500,7 +649,7 @@
 }
 
 /* ==========================================================================
-   3.3 Diálogo de cancelación
+   3.5 Diálogo de cancelación
    ========================================================================== */
 
 .panel-dialog {
@@ -544,6 +693,25 @@
    4. Responsive
    ========================================================================== */
 
+@media (max-width: 760px) {
+    .hours-item {
+        grid-template-columns: 1fr 1fr;
+        align-items: center;
+    }
+
+    .hours-day {
+        grid-column: 1 / -1;
+    }
+
+    .hours-actions {
+        grid-column: 1 / -1;
+    }
+
+    .hours-actions .btn {
+        width: 100%;
+    }
+}
+
 @media (max-width: 520px) {
     .panel-brand-sub {
         display: none;
@@ -560,6 +728,15 @@
 
     .appointment-actions {
         justify-content: flex-start;
+    }
+
+    .service-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .service-actions .btn {
+        width: 100%;
     }
 
     .block-actions {

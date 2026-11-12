@@ -33,12 +33,13 @@ public record ServiceRequest(
 
         Boolean active,
 
+        @Min(value = 0, message = "El orden no puede ser negativo.")
         Integer sortOrder
 ) {
 
     public void applyTo(ServiceOffering service) {
         service.setName(name.trim());
-        service.setDescription(description);
+        service.setDescription(normalizedDescription());
         service.setPrice(price);
         service.setDurationMinutes(durationMinutes);
         if (active != null) {
@@ -47,5 +48,10 @@ public record ServiceRequest(
         if (sortOrder != null) {
             service.setSortOrder(sortOrder);
         }
+    }
+
+    /** La descripción vacía se guarda como null, no como cadena vacía. */
+    public String normalizedDescription() {
+        return description == null || description.isBlank() ? null : description.trim();
     }
 }

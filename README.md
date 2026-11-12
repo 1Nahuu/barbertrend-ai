@@ -3,14 +3,16 @@
 Sistema de reservas online para una barbería masculina, con un asistente de
 marketing basado en IA como segunda etapa.
 
-**Estado actual: Etapa 3 casi cerrada.** La web pública está construida, el
+**Estado actual: Etapa 3 cerrada.** La web pública está construida, el
 formulario **crea reservas reales** contra la API y el panel del barbero ya
 muestra los turnos: se pueden confirmar, completar o cancelar. También permite
 **cerrar días completos o franjas horarias** por vacaciones, feriados o
-descansos. Cuando entra un turno nuevo, el barbero recibe un **aviso por
-email**; al confirmarlo, el panel le da un enlace de **WhatsApp manual** para
-avisarle al cliente (gratis, sin API de Meta). La automatización oficial de
-WhatsApp queda para la Etapa 4.
+descansos, y **administrar el catálogo de servicios y el horario semanal** sin
+tocar archivos: esos datos viven en la base y el sitio público los carga desde
+la API. Cuando entra un turno nuevo, el barbero recibe un **aviso por email**;
+al confirmarlo, el panel le da un enlace de **WhatsApp manual** para avisarle
+al cliente (gratis, sin API de Meta). La automatización oficial de WhatsApp
+queda para la Etapa 4.
 
 **Doble S Barbería** — nombre, logo, contactos, Instagram, precios de los
 4 servicios y horario ya son datos reales y confirmados. Lo único que sigue
@@ -112,10 +114,16 @@ cd backend
 ./mvnw test
 ```
 
-Estado actual: pasan **las 46 pruebas**. Incluyen concurrencia de reservas,
+Estado actual: pasan **las 57 pruebas**. Incluyen concurrencia de reservas,
 el circuito completo de una reserva (disponibilidad, alta, rechazo del horario
-duplicado y confirmación desde el panel), cierres de agenda, el límite de
-intentos, el login y los avisos.
+duplicado y confirmación desde el panel), cierres de agenda, administración de
+servicios y horarios, el límite de intentos, el login y los avisos.
+
+La interfaz de **Servicios** y **Horario de atención** también se verificó en
+un navegador headless: crear, editar, desactivar y volver a mostrar un servicio,
+cambiar el horario de un día y cerrar otro. La prueba manual no reemplaza a la
+suite; sirve para comprobar que el HTML y el JavaScript del panel funcionan
+juntos.
 
 ### Verificar en perfiles
 
@@ -150,16 +158,36 @@ borrarlo**: hay que rotar las credenciales, porque siguen en el historial.
 
 ## Dónde cambiar los datos de la barbería
 
-Todos los textos, precios, horarios y contactos de la web pública están en
-**un solo archivo**:
+Hay dos lugares, según el tipo de dato:
+
+### Servicios y horario de atención
+
+Se administran desde el panel, en las secciones **Servicios** y
+**Horario de atención**:
+
+```
+http://localhost:8080/admin
+```
+
+Los cambios se guardan en la base de datos y el sitio público los carga desde
+la API. No hace falta reiniciar la aplicación ni editar archivos.
+
+- **Servicios:** nombre, descripción, precio, duración, orden y si está activo.
+  Desactivar un servicio lo saca de la web, pero conserva los turnos ya
+  reservados.
+- **Horario:** apertura y cierre de cada día, o el día marcado como cerrado.
+  Las horas tienen que caer en bloques de 30 minutos.
+
+### Marca, contacto y galería
+
+Los textos de portada, el logo, los contactos y las fotos siguen en:
 
 ```
 backend/src/main/resources/static/assets/js/site-config.js
 ```
 
-Para pasar de los datos de ejemplo a los reales se edita **solo ese archivo**,
-sin tocar el HTML ni el CSS. Cada valor tiene un comentario `⚠️ DATO DE
-EJEMPLO` que marca lo que hay que reemplazar.
+Ese archivo también conserva una **lista de respaldo** de servicios y horarios:
+se usa solo si la API no responde, para que el sitio no quede vacío.
 
 El checklist de lo que falta está en
 [`docs/datos-pendientes.md`](docs/datos-pendientes.md).
@@ -186,12 +214,15 @@ y los enlaces funcionan igual que en producción.
 |---|---|
 | Diseño responsive (móvil, tablet, computadora) | ✅ Listo |
 | Servicios, galería, horarios y contacto | ✅ Listo, con datos reales |
+| Servicios y horario cargados desde la base | ✅ Listo, con respaldo si la API falla |
 | Formulario de reserva con sus estados | ✅ Listo: crea reservas reales |
 | Login y acceso al panel del barbero | ✅ Listo y probado |
 | Backend de reservas (API) | ✅ Listo, con garantía anti-superposición |
 | Límite de intentos de reserva por IP | ✅ Listo (5 cada 10 minutos, configurable) |
 | Panel: listar, confirmar, completar y cancelar turnos | ✅ Listo |
 | Panel: cerrar días completos o franjas horarias | ✅ Listo |
+| Panel: crear, editar y desactivar servicios | ✅ Listo |
+| Panel: editar el horario semanal | ✅ Listo |
 | Aviso por email al barbero | ✅ Listo (modo dry-run por defecto) |
 | WhatsApp al cliente | 🟡 Manual con enlace `wa.me`; la API oficial es Etapa 4 |
 | Asistente de marketing con IA | ❌ Etapa 5 |
@@ -243,6 +274,21 @@ horario bloqueado. **No se cancelan turnos automáticamente**: si ya hay turnos
 pendientes o confirmados en el rango, el sistema rechaza el cierre e indica
 cuántos hay. Primero se cancelan esos turnos y después se crea el cierre.
 
+### Servicios y horario desde el panel
+
+La sección **Servicios** permite crear, editar, ordenar, activar y desactivar
+servicios. Un servicio desactivado deja de aparecer en la web, pero **no se
+borra**: los turnos que ya lo tenían reservado conservan su historial.
+
+La sección **Horario de atención** muestra los siete días de la semana. Para
+cada uno se puede cambiar la apertura y el cierre, o marcarlo como cerrado. Las
+horas deben caer en bloques de 30 minutos. El cambio se refleja de inmediato en
+la disponibilidad y en la tabla de horarios del sitio público.
+
+> Cambiar el horario semanal **no cancela turnos ya reservados**. Si un día
+> queda fuera del nuevo horario, esos turnos siguen en la agenda: revisalos y
+> cancelalos manualmente si hace falta.
+
 ### Acceso al panel
 
 1. Abrir <http://localhost:8080/admin/login>. También hay un enlace discreto
@@ -260,7 +306,7 @@ cuántos hay. Primero se cancelan esos turnos y después se crea el cierre.
 |---|---|---|
 | 1 | Análisis, arquitectura, modelo de datos | ✅ Hecho |
 | 2 | Web pública responsive | ✅ Hecho |
-| 3 | Backend, reservas, panel, seguridad | ✅ Hecho (reservas reales, panel y aviso por email) |
+| 3 | Backend, reservas, panel, seguridad | ✅ Hecho (reservas, panel, servicios, horario y aviso por email) |
 | 4 | Integración con WhatsApp | 🟡 Hecho el envío manual; falta la API oficial |
 | 5 | Asistente de marketing | ⬜ Pendiente |
 | 6 | Automatización y despliegue | ⬜ Pendiente |

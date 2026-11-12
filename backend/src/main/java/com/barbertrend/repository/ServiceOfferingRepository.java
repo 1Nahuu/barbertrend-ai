@@ -18,5 +18,7 @@ public interface ServiceOfferingRepository extends JpaRepository<ServiceOffering
 
     Optional<ServiceOffering> findByName(String name);
 
+    boolean existsByNameIgnoreCase(String name);
+
     boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
 }

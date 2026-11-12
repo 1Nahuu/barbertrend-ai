@@ -9,8 +9,10 @@
  *   - Dibuja servicios, galería, horarios y datos de contacto
  *   - Arma el selector de servicio del formulario de reservas
  *
- * Todos los datos salen de SITE_CONFIG (assets/js/site-config.js).
- * Para cambiar la barbería se edita ese archivo, no este.
+ * Los datos de marca, contacto y galería salen de SITE_CONFIG
+ * (assets/js/site-config.js). Los servicios y el horario de atención se
+ * cargan desde la API pública, porque se administran desde el panel.
+ * SITE_CONFIG queda como respaldo si la API no responde.
  *
  * Se ejecuta cuando el DOM ya está listo, porque los scripts están al final
  * del <body>. Por eso se puede buscar cualquier elemento directamente.
@@ -130,6 +132,11 @@
             node.textContent = textContent;
         }
         return node;
+    }
+
+    /** "lunes" -> "Lunes" */
+    function capitalize(text) {
+        return text ? text.charAt(0).toUpperCase() + text.slice(1) : '';
     }
 
     // ==========================================================================
@@ -317,7 +324,7 @@
 
         body.innerHTML = '';
 
-        SITE_CONFIG.hours.forEach(function (entry, index) {
+        (SITE_CONFIG.hours || []).forEach(function (entry, index) {
             const row = el('tr');
             row.className = 'hours-row';
 
@@ -328,12 +335,52 @@
             const dayCell = el('td', null, entry.day);
             row.appendChild(dayCell);
 
-            const timeCell = el('td', null, entry.closed ? 'Cerrado' : entry.open + ' – ' + entry.close);
-            if (entry.closed) timeCell.className = 'is-closed';
+            const isClosed = entry.closed || !entry.open || !entry.close;
+            const timeCell = el('td', null,
+                isClosed ? 'Cerrado' : entry.open + ' – ' + entry.close);
+            if (isClosed) timeCell.className = 'is-closed';
             row.appendChild(timeCell);
 
             body.appendChild(row);
         });
+    }
+
+    /**
+     * Reemplaza el horario de ejemplo por el que está cargado en la base.
+     * Si la API falla, se mantiene la lista de respaldo de site-config.js.
+     */
+    async function loadHoursFromApi() {
+        try {
+            const response = await fetch('/api/public/business-hours', {
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (!response.ok) return;
+
+            const data = await response.json();
+            if (!data || !Array.isArray(data.days) || data.days.length !== 7) {
+                return;
+            }
+
+            SITE_CONFIG.hours = data.days.map(function (day) {
+                const name = capitalize(day.dayName);
+                return {
+                    day: name,
+                    short: name.substring(0, 3),
+                    open: day.openTime ? day.openTime.substring(0, 5) : null,
+                    close: day.closeTime ? day.closeTime.substring(0, 5) : null,
+                    closed: day.closed || !day.openTime || !day.closeTime
+                };
+            });
+
+            renderHours();
+
+            // booking.js dibujó los días rápidos con el respaldo antes de
+            // que llegara la API. Se le avisa para que use el horario real.
+            window.dispatchEvent(new CustomEvent('bt:hours-loaded'));
+        } catch (error) {
+            console.warn('No se pudo cargar el horario desde la API:', error);
+        }
     }
 
     function renderFooter() {
@@ -361,6 +408,12 @@
         if (!grid) return;
 
         grid.innerHTML = '';
+
+        if (!SITE_CONFIG.services || SITE_CONFIG.services.length === 0) {
+            grid.appendChild(el('p', 'services-empty',
+                'No hay servicios disponibles por el momento.'));
+            return;
+        }
 
         SITE_CONFIG.services.forEach(function (service) {
             const card = el('article', 'service-card');
@@ -421,6 +474,12 @@
 
         picker.innerHTML = '';
 
+        if (!SITE_CONFIG.services || SITE_CONFIG.services.length === 0) {
+            picker.appendChild(el('p', 'service-picker-empty',
+                'No hay servicios disponibles por el momento.'));
+            return;
+        }
+
         SITE_CONFIG.services.forEach(function (service) {
             const option = el('div', 'service-option');
 
@@ -455,6 +514,66 @@
             option.appendChild(label);
             picker.appendChild(option);
         });
+    }
+
+    /**
+     * Reemplaza los servicios de ejemplo por los que están cargados en la
+     * base. Conserva la selección si el servicio sigue existiendo.
+     *
+     * <p>Si la API falla, se mantiene la lista de respaldo de site-config.js
+     * y el sitio sigue funcionando.
+     */
+    async function loadServicesFromApi() {
+        try {
+            const response = await fetch('/api/public/services', {
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (!response.ok) return;
+
+            const data = await response.json();
+            if (!Array.isArray(data)) return;
+
+            const previous = SITE_CONFIG.services || [];
+            const selected = document.querySelector(
+                '#service-picker input[name="servicio"]:checked');
+            const selectedId = selected ? Number(selected.value) : null;
+
+            SITE_CONFIG.services = data.map(function (service) {
+                const old = previous.find(function (item) {
+                    return item.id === service.id;
+                }) || {};
+
+                return {
+                    id: service.id,
+                    name: service.name,
+                    description: service.description || '',
+                    duration: service.durationMinutes,
+                    price: service.price,
+                    popular: !!old.popular
+                };
+            });
+
+            renderServices();
+            renderServicePicker();
+
+            const stillThere = selectedId
+                ? document.getElementById('servicio-' + selectedId)
+                : null;
+
+            if (stillThere) {
+                stillThere.checked = true;
+                stillThere.dispatchEvent(new Event('change', { bubbles: true }));
+            } else if (selectedId) {
+                // El servicio elegido ya no existe: booking.js limpia el
+                // resumen y la grilla de horarios.
+                window.dispatchEvent(new CustomEvent('bt:service-selected', {
+                    detail: { serviceId: null }
+                }));
+            }
+        } catch (error) {
+            console.warn('No se pudieron cargar los servicios desde la API:', error);
+        }
     }
 
     /** Marca un servicio como elegido (usado por los botones "Reservar") */
@@ -556,6 +675,10 @@
         renderServices();
         renderServicePicker();
         renderGallery();
+
+        // La base es la fuente real; la configuración queda como respaldo.
+        loadServicesFromApi();
+        loadHoursFromApi();
     }
 
     init();

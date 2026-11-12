@@ -14,8 +14,10 @@
  *  Lo que SIGUE SIENDO DE EJEMPLO (marcado con ⚠️ abajo):
  *    - El eslogan y los textos de la portada
  *
- *  Para cambiar cualquier dato del negocio se edita SOLO este archivo,
- *  sin tocar el HTML ni el CSS.
+ *  Los datos de marca, contacto y galería se editan en este archivo.
+ *  Los servicios y el horario de atención se administran desde el panel
+ *  del barbero y se cargan desde la API. Las listas de abajo son un
+ *  respaldo para que el sitio se vea aunque la API no responda.
  *
  *  ── Cómo se lee ──────────────────────────────────────────────────────────
  *  El HTML ya está cargado cuando estas funciones se ejecutan (los scripts
@@ -130,13 +132,14 @@ window.SITE_CONFIG = {
   },
 
   // -----------------------------------------------------------------------
-  // Horario de atención — ✅ DATO REAL, confirmado por el dueño
+  // Horario de atención — RESPALDO
   // -----------------------------------------------------------------------
-  // El panel del dueño todavía no administra los horarios. Por ahora se
-  // editan acá, en un solo lugar.
+  // La fuente real es el horario que se carga desde el panel. Esta lista
+  // solo se usa si la API pública no responde, para que el sitio no quede
+  // sin información.
   //
-  // Para cambiar un horario: modificá open/close. Para cerrar un día,
-  // poné closed: true.
+  // Para cambiar un horario de respaldo: modificá open/close. Para cerrar
+  // un día, poné closed: true.
   hours: [
     { day: 'Lunes',     short: 'Lun', open: '09:00', close: '21:00', closed: false },
     { day: 'Martes',    short: 'Mar', open: '09:00', close: '21:00', closed: false },
@@ -148,10 +151,11 @@ window.SITE_CONFIG = {
   ],
 
   // -----------------------------------------------------------------------
-  // Servicios — datos REALES
+  // Servicios — RESPALDO
   // -----------------------------------------------------------------------
-  // El panel del dueño todavía no administra el catálogo. Por ahora se
-  // edita acá, en un solo lugar.
+  // La fuente real es la base de datos: el dueño edita los servicios desde
+  // el panel. Esta lista solo se usa si la API pública no responde, para que
+  // el sitio no quede vacío.
   //
   //   price -> precio real
   //   duration -> duración NOMINAL. NO se muestra al cliente, porque un

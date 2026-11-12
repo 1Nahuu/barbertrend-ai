@@ -1,15 +1,18 @@
 package com.barbertrend.web;
 
+import com.barbertrend.common.BusinessHoursException;
 import com.barbertrend.common.ResourceNotFoundException;
+import com.barbertrend.common.ServiceConflictException;
 import com.barbertrend.domain.Appointment;
 import com.barbertrend.domain.AppointmentStatus;
+import com.barbertrend.domain.ServiceOffering;
 import com.barbertrend.dto.AdminAppointmentDetailResponse;
 import com.barbertrend.dto.AdminAppointmentResponse;
+import com.barbertrend.dto.AdminServiceResponse;
 import com.barbertrend.dto.AppointmentStatusResponse;
 import com.barbertrend.dto.BusinessHoursResponse;
 import com.barbertrend.dto.CancelAppointmentRequest;
 import com.barbertrend.dto.ServiceRequest;
-import com.barbertrend.dto.ServiceResponse;
 import com.barbertrend.dto.UpdateStatusRequest;
 import com.barbertrend.config.AppProperties;
 import com.barbertrend.repository.AppointmentRepository;
@@ -20,6 +23,7 @@ import jakarta.validation.Valid;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -154,42 +158,51 @@ public class AdminController {
 
     /** Todos los servicios, incluidos los desactivados. */
     @GetMapping("/services")
-    public List<ServiceResponse> listServices() {
+    public List<AdminServiceResponse> listServices() {
         return serviceRepository.findAll().stream()
-                .sorted(java.util.Comparator.comparingInt(
-                        service -> service.getSortOrder()))
-                .map(service -> ServiceResponse.from(service, properties.getCurrency()))
+                .sorted(java.util.Comparator
+                        .comparingInt(ServiceOffering::getSortOrder)
+                        .thenComparing(ServiceOffering::getName,
+                                String.CASE_INSENSITIVE_ORDER))
+                .map(service -> AdminServiceResponse.from(
+                        service, properties.getCurrency()))
                 .toList();
     }
 
     @PostMapping("/services")
-    public ResponseEntity<ServiceResponse> createService(
+    public ResponseEntity<AdminServiceResponse> createService(
             @Valid @RequestBody ServiceRequest request) {
 
-        var service = serviceRepository.save(new com.barbertrend.domain.ServiceOffering(
-                request.name().trim(),
-                request.description(),
+        String name = request.name().trim();
+        ensureUniqueName(name, null);
+
+        var service = new ServiceOffering(
+                name,
+                request.normalizedDescription(),
                 request.price(),
                 request.durationMinutes(),
-                request.sortOrder() == null ? 0 : request.sortOrder()));
+                request.sortOrder() == null ? 0 : request.sortOrder());
 
         if (request.active() != null) {
             service.setActive(request.active());
-            serviceRepository.save(service);
         }
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ServiceResponse.from(service, properties.getCurrency()));
+                .body(AdminServiceResponse.from(
+                        serviceRepository.save(service), properties.getCurrency()));
     }
 
     @PutMapping("/services/{id}")
-    public ServiceResponse updateService(@PathVariable Long id,
-                                         @Valid @RequestBody ServiceRequest request) {
+    public AdminServiceResponse updateService(@PathVariable Long id,
+                                              @Valid @RequestBody ServiceRequest request) {
         var service = serviceRepository.findById(id)
                 .orElseThrow(() -> ResourceNotFoundException.service(id));
 
+        ensureUniqueName(request.name().trim(), id);
+
         request.applyTo(service);
-        return ServiceResponse.from(serviceRepository.save(service), properties.getCurrency());
+        return AdminServiceResponse.from(
+                serviceRepository.save(service), properties.getCurrency());
     }
 
     /**
@@ -199,13 +212,30 @@ public class AdminController {
      * borrarlo rompería el historial.
      */
     @PatchMapping("/services/{id}/active")
-    public ServiceResponse setServiceActive(@PathVariable Long id,
-                                            @RequestParam boolean active) {
+    public AdminServiceResponse setServiceActive(@PathVariable Long id,
+                                                 @RequestParam boolean active) {
         var service = serviceRepository.findById(id)
                 .orElseThrow(() -> ResourceNotFoundException.service(id));
 
         service.setActive(active);
-        return ServiceResponse.from(serviceRepository.save(service), properties.getCurrency());
+        return AdminServiceResponse.from(
+                serviceRepository.save(service), properties.getCurrency());
+    }
+
+    /**
+     * El nombre tiene que ser único sin importar mayúsculas.
+     *
+     * <p>La base también lo garantiza, pero validarlo acá permite devolver un
+     * mensaje claro antes de guardar.
+     */
+    private void ensureUniqueName(String name, Long id) {
+        boolean exists = id == null
+                ? serviceRepository.existsByNameIgnoreCase(name)
+                : serviceRepository.existsByNameIgnoreCaseAndIdNot(name, id);
+
+        if (exists) {
+            throw ServiceConflictException.duplicateName();
+        }
     }
 
     // =====================================================================
@@ -225,24 +255,40 @@ public class AdminController {
             @RequestBody BusinessHoursResponse.DayHoursRequest request) {
 
         if (dayOfWeek < 1 || dayOfWeek > 7) {
-            throw new IllegalArgumentException(
-                    "El día tiene que estar entre 1 (lunes) y 7 (domingo).");
+            throw BusinessHoursException.invalidDay();
         }
 
         if (!request.isValid()) {
-            throw new IllegalArgumentException(
-                    "Si el día no está cerrado, tiene que tener hora de apertura "
-                            + "y de cierre, y el cierre tiene que ser posterior.");
+            throw BusinessHoursException.invalidRange();
+        }
+
+        if (!request.closed()
+                && (!isOnGrid(request.openTime()) || !isOnGrid(request.closeTime()))) {
+            throw BusinessHoursException.invalidGrid(properties.getSlotMinutes());
         }
 
         var hours = businessHoursRepository.findByDayOfWeek(dayOfWeek)
                 .orElseThrow(() -> new IllegalStateException(
                         "No está cargado el horario del día " + dayOfWeek + "."));
 
-        hours.setOpenTime(request.openTime());
-        hours.setCloseTime(request.closeTime());
+        // Un día cerrado no guarda horas: así no quedan datos viejos que
+        // confundan al sitio público.
+        hours.setOpenTime(request.closed() ? null : request.openTime());
+        hours.setCloseTime(request.closed() ? null : request.closeTime());
         hours.setClosed(request.closed());
 
         return BusinessHoursResponse.DayHours.from(businessHoursRepository.save(hours));
+    }
+
+    /**
+     * La grilla de la agenda avanza en bloques fijos. Si la apertura o el
+     * cierre no caen en un múltiplo del bloque, aparecerían horarios
+     * corridos (por ejemplo 09:15, 09:45) que no siguen la regla del local.
+     */
+    private boolean isOnGrid(LocalTime time) {
+        return time != null
+                && time.getSecond() == 0
+                && time.getNano() == 0
+                && time.getMinute() % properties.getSlotMinutes() == 0;
     }
 }

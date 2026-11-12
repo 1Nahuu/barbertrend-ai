@@ -80,6 +80,123 @@
             <div id="appointments-list" class="appointments-list"></div>
         </section>
 
+        <section class="panel-card panel-services" aria-labelledby="services-title">
+            <div class="panel-card-head">
+                <div>
+                    <h2 class="panel-card-title" id="services-title">Servicios</h2>
+                    <p class="panel-card-text">
+                        Editá el catálogo que se muestra en la web. Un servicio
+                        desactivado deja de ofrecerse, pero no borra los turnos
+                        que ya tienen reservado.
+                    </p>
+                </div>
+
+                <button class="btn btn-outline btn-sm" type="button"
+                        id="service-new">
+                    Nuevo servicio
+                </button>
+            </div>
+
+            <div id="services-status" class="form-status"
+                 role="status" aria-live="polite"></div>
+
+            <div id="services-list" class="services-list"></div>
+
+            <form class="service-form" id="service-form" novalidate hidden>
+                <h3 class="service-form-title" id="service-form-title">
+                    Nuevo servicio
+                </h3>
+
+                <input type="hidden" id="service-id">
+
+                <div class="service-form-row">
+                    <div class="field">
+                        <label class="label" for="service-name">Nombre</label>
+                        <input class="input" type="text" id="service-name"
+                               maxlength="80" required>
+                    </div>
+
+                    <div class="field">
+                        <label class="label" for="service-price">
+                            Precio (<span id="service-currency">ARS</span>)
+                        </label>
+                        <input class="input" type="number" id="service-price"
+                               min="0" step="500" inputmode="decimal" required>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label" for="service-description">
+                        Descripción <span class="label-optional">(opcional)</span>
+                    </label>
+                    <textarea class="input" id="service-description" rows="2"
+                              maxlength="500"></textarea>
+                </div>
+
+                <div class="service-form-row">
+                    <div class="field">
+                        <label class="label" for="service-duration">
+                            Duración (minutos)
+                        </label>
+                        <input class="input" type="number" id="service-duration"
+                               min="1" step="5" value="30" required>
+                        <p class="field-help">
+                            Se usa para la agenda. No se muestra en la web.
+                        </p>
+                    </div>
+
+                    <div class="field">
+                        <label class="label" for="service-sort">Orden</label>
+                        <input class="input" type="number" id="service-sort"
+                               min="0" step="1" value="0">
+                        <p class="field-help">
+                            Los números más bajos aparecen primero.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="field checkbox-field">
+                    <label class="checkbox-label" for="service-active">
+                        <input type="checkbox" id="service-active" checked>
+                        Activo (visible en la web)
+                    </label>
+                </div>
+
+                <p class="field-error" id="service-error" role="alert"></p>
+
+                <div class="panel-form-actions">
+                    <button class="btn btn-primary" type="submit"
+                            id="service-submit">
+                        Guardar servicio
+                    </button>
+                    <button class="btn btn-outline" type="button"
+                            id="service-cancel">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <section class="panel-card panel-hours" aria-labelledby="hours-title">
+            <div class="panel-card-head">
+                <div>
+                    <h2 class="panel-card-title" id="hours-title">
+                        Horario de atención
+                    </h2>
+                    <p class="panel-card-text">
+                        El horario se usa para calcular los turnos disponibles.
+                        Los turnos que ya están reservados no se cancelan si
+                        cambiás el horario: primero revisalos y cancelalos vos.
+                    </p>
+                </div>
+            </div>
+
+            <div id="hours-status" class="form-status"
+                 role="status" aria-live="polite"></div>
+
+            <div id="hours-list" class="hours-list"></div>
+        </section>
+
         <section class="panel-card panel-blocks" aria-labelledby="blocks-title">
             <div class="panel-card-head">
                 <div>

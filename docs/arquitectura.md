@@ -344,9 +344,9 @@ POST /admin/logout  → cierra la sesión → 302 a /admin/login?logout
 | `AdminPageController` | Sirve `/admin/login` y redirige al panel si ya hay sesión |
 | `CsrfCookieFilter` | Fuerza la escritura de la cookie `XSRF-TOKEN` |
 | `static/admin/login.html` | Formulario de ingreso |
-| `static/admin/index.html` | Panel: turnos, cierres de agenda y diálogo de cancelación |
+| `static/admin/index.html` | Panel: turnos, servicios, horario, cierres de agenda y diálogo de cancelación |
 | `assets/js/admin-login.js` | Copia el token CSRF y valida los campos |
-| `assets/js/admin-panel.js` | Lista y cambia turnos, gestiona cierres y prepara el cierre de sesión |
+| `assets/js/admin-panel.js` | Lista y cambia turnos, administra servicios y horario, gestiona cierres y prepara el cierre de sesión |
 
 **Por qué el token CSRF va en una cookie y no en el HTML:** la página de login
 es un archivo estático. Spring no la genera, así que no puede imprimir el token
@@ -364,6 +364,16 @@ hacen un *forward* interno. La barra de direcciones no cambia.
 **Qué muestra el panel:** el listado de turnos (hoy y los próximos 7 días, o
 filtrado por estado). Desde ahí el barbero confirma, completa o cancela un
 turno. Al confirmar, aparece el botón de WhatsApp con el mensaje ya armado.
+También administra el catálogo de servicios y el horario semanal.
+
+**Servicios y horario: una sola fuente de verdad.** El catálogo y el horario
+viven en la base (`service` y `business_hours`) y se editan desde el panel con
+`/api/admin/services` y `/api/admin/business-hours`. El sitio público los pide
+a `GET /api/public/services` y `GET /api/public/business-hours`; la lista de
+`site-config.js` queda solo como respaldo si la API no responde. Así el dueño
+no tiene que editar archivos ni reiniciar la aplicación para cambiar un precio
+o un horario. Los servicios no se borran: se desactivan, porque los turnos
+históricos los referencian.
 
 ### 7.4 Avisos al barbero: email automático y WhatsApp manual
 
@@ -450,7 +460,7 @@ Cobertura mínima antes de dar por terminado un módulo: **crear turno válido,
 turno duplicado, turno en horario cerrado, turno en el pasado, validación de
 campos y acceso no autorizado al panel**.
 
-**Estado de la suite (verificado el 2026-11-08):** pasan **las 46 pruebas**.
+**Estado de la suite (verificado el 2026-11-11):** pasan **las 57 pruebas**.
 
 | Clase | Pruebas | Qué cubre |
 |---|---|---|
@@ -458,6 +468,8 @@ campos y acceso no autorizado al panel**.
 | `ConcurrentBookingTest` | 2 | 20 reservas simultáneas → gana una sola |
 | `BookingFlowApiTest` | 3 | Disponibilidad, alta, 409, confirmación y WhatsApp |
 | `AdminBlockApiTest` | 9 | Cierres completos, parciales, superposición y acceso |
+| `AdminServiceApiTest` | 6 | Alta, edición, nombres repetidos, activación y acceso |
+| `AdminBusinessHoursApiTest` | 5 | Días cerrados, cambio de horario, validación y acceso |
 | `LoginSecurityTest` | 8 | Acceso al panel, CSRF y logout |
 | `WhatsAppLinkBuilderTest` | 6 | Normalización del teléfono argentino |
 | `EmailAppointmentNotifierTest` | 3 | Dry-run y contenido del email |

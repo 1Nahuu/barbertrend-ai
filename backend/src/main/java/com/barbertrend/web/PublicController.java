@@ -5,9 +5,11 @@ import com.barbertrend.domain.ServiceOffering;
 import com.barbertrend.dto.AppointmentCreatedResponse;
 import com.barbertrend.dto.AppointmentStatusResponse;
 import com.barbertrend.dto.AvailabilityResponse;
+import com.barbertrend.dto.BusinessHoursResponse;
 import com.barbertrend.dto.CreateAppointmentRequest;
 import com.barbertrend.dto.ServiceResponse;
 import com.barbertrend.repository.AppointmentRepository;
+import com.barbertrend.repository.BusinessHoursRepository;
 import com.barbertrend.repository.ServiceOfferingRepository;
 import com.barbertrend.service.AvailabilityService;
 import com.barbertrend.service.BookingRateLimiter;
@@ -40,6 +42,7 @@ public class PublicController {
 
     private final ServiceOfferingRepository serviceRepository;
     private final AppointmentRepository appointmentRepository;
+    private final BusinessHoursRepository businessHoursRepository;
     private final AvailabilityService availabilityService;
     private final BookingService bookingService;
     private final BookingRateLimiter rateLimiter;
@@ -48,6 +51,7 @@ public class PublicController {
 
     public PublicController(ServiceOfferingRepository serviceRepository,
                             AppointmentRepository appointmentRepository,
+                            BusinessHoursRepository businessHoursRepository,
                             AvailabilityService availabilityService,
                             BookingService bookingService,
                             BookingRateLimiter rateLimiter,
@@ -55,6 +59,7 @@ public class PublicController {
                             Clock clock) {
         this.serviceRepository = serviceRepository;
         this.appointmentRepository = appointmentRepository;
+        this.businessHoursRepository = businessHoursRepository;
         this.availabilityService = availabilityService;
         this.bookingService = bookingService;
         this.rateLimiter = rateLimiter;
@@ -68,6 +73,13 @@ public class PublicController {
         return serviceRepository.findByActiveTrueOrderBySortOrderAsc().stream()
                 .map(service -> ServiceResponse.from(service, properties.getCurrency()))
                 .toList();
+    }
+
+    /** Horario de atención de los 7 días, para mostrarlo en el sitio. */
+    @GetMapping("/business-hours")
+    public BusinessHoursResponse businessHours() {
+        return BusinessHoursResponse.from(
+                businessHoursRepository.findAllByOrderByDayOfWeekAsc());
     }
 
     /** Horarios libres para un servicio en una fecha. */
